@@ -291,13 +291,6 @@ const promptChips = [
   '创建数据看板',
 ];
 
-const productCapabilities = [
-  { id: 'chat', title: '对话与推理', description: '多轮对话、生成中反馈、公开推理摘要、引用来源与结果操作。', icon: IconMessage },
-  { id: 'skill', title: 'Skill 生态', description: '发现、安装、试用、启停 Skill，并在对话中直接调用。', icon: IconSkill },
-  { id: 'mcp', title: 'MCP 连接', description: '管理浏览器、文件、数据和工作区连接器，支持授权与可信开关。', icon: IconDatabase },
-  { id: 'files', title: '文件资产', description: '上传、检索、预览图片、文档、代码、视频等上下文资产。', icon: IconFolder },
-];
-
 const searchGroups = [
   {
     title: '今天',
@@ -723,22 +716,6 @@ function WelcomePage({
               </button>
             ))}
           </div>
-        </section>
-        <section className="capability-summary" aria-label="产品能力">
-          {productCapabilities.map((item) => {
-            const Icon = item.icon;
-            return (
-              <article key={item.id} className="capability-summary-card">
-                <span className="capability-icon">
-                  <Icon size={20} />
-                </span>
-                <div>
-                  <strong>{item.title}</strong>
-                  <p>{item.description}</p>
-                </div>
-              </article>
-            );
-          })}
         </section>
       </div>
     </section>
