@@ -1,0 +1,179 @@
+{
+  "title": "通用Agent需求测试",
+  "url": "https://bytedance.larkoffice.com/wiki/AiT2wOGRJiL3ZakllglcBGmPnBf",
+  "items": [
+    {
+      "section": "欢迎页",
+      "type": "image",
+      "token": "GAn9bJoRuoIdGCxWgFHc5UZVnHe",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "section": "欢迎页",
+      "type": "image",
+      "token": "ErELb3M36ovK7gxb6yXcpOL5nAc",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "section": "欢迎页",
+      "type": "image",
+      "token": "CPZMbZ1sZoaR0OxTv4pcNe62nzh",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "section": "欢迎页",
+      "type": "image",
+      "token": "Lia1bk3MLol7lrxHQehc4fIUn9g",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "section": "欢迎页",
+      "type": "file",
+      "token": "OPctb8qowobhdwxwn9Sc4gwPnDh",
+      "name": "20260429105439_rec_-convert.mp4"
+    },
+    {
+      "section": "搜索",
+      "type": "image",
+      "token": "PAfjbPzhDoOX2LxTNx8cqQMcnde",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "section": "会话页-生成中",
+      "type": "image",
+      "token": "PCNfbKRtEoAQu4xXZd5cUShmnSf",
+      "width": 1822,
+      "height": 1138
+    },
+    {
+      "section": "会话页-生成中",
+      "type": "image",
+      "token": "MHhYbtjg8oz7CPx4bHwcXQyRnrg",
+      "width": 1826,
+      "height": 1136
+    },
+    {
+      "section": "会话页-生成中",
+      "type": "image",
+      "token": "M7rfbqEnLo0IboxvrRNc5xZHnYg",
+      "width": 2880,
+      "height": 2786
+    },
+    {
+      "section": "会话页-生成中",
+      "type": "image",
+      "token": "LsImb0luToLNIJxRCTxcyuXNnoh",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "section": "会话页-生成中",
+      "type": "image",
+      "token": "GMTibTcQpoAluQxEvndcCAPwnNe",
+      "width": 2880,
+      "height": 2470
+    },
+    {
+      "section": "会话页-结果",
+      "type": "image",
+      "token": "W1yjb8kSRoGyg1xrCgwc2Cijnfe",
+      "width": 2880,
+      "height": 3412
+    },
+    {
+      "section": "会话页-结果",
+      "type": "image",
+      "token": "H5vCbQqq3oNFXmx50m1c8HSlnSe",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "section": "会话页-结果",
+      "type": "image",
+      "token": "TM44b2W1yoMgRIxTAjHcCtU3nKe",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "section": "会话页-结果",
+      "type": "image",
+      "token": "Kn85b6hn0oRXO2xZtpqcwZYonMg",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "section": "会话页-结果",
+      "type": "image",
+      "token": "OqzBbirLBoWR9exCSKsc1yr8nEd",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "section": "会话页-结果",
+      "type": "image",
+      "token": "V8EJbvhG4oF32TxmKmacAXJnnQb",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "section": "会话页-结果",
+      "type": "image",
+      "token": "KRWTbv58ZoX7JBx1DR0clYknnYc",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "section": "会话页-结果",
+      "type": "file",
+      "token": "IR9FbZh2uo5eS7xfLIzcIi6PnLQ",
+      "name": "产出物动效-文件-2.mp4"
+    },
+    {
+      "section": "文件",
+      "type": "image",
+      "token": "TYlOb6QUAocCXOxGDPZcrftXnpf",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "section": "文件",
+      "type": "image",
+      "token": "Z1njbfTK3one6IxdiFpcUM6ynOc",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "section": "skill",
+      "type": "image",
+      "token": "Pog8bNqSUoS23nxWeC0cEXG3nqc",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "section": "skill",
+      "type": "image",
+      "token": "RqF5baVHFoJXfoxATUQc1hABnjh",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "section": "MCP",
+      "type": "image",
+      "token": "BvAzbutSnoMYxcx1DrmcFeohnbC",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "section": "设置",
+      "type": "image",
+      "token": "B9yWbk4XfonisOxADuVcVOQKn8g",
+      "width": 2880,
+      "height": 1800
+    }
+  ]
+}

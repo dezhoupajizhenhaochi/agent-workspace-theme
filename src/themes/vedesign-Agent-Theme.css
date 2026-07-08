@@ -1,0 +1,718 @@
+/* Color Tokens
+ * Skill: vedesign-Agent · Default (v2.1.0)
+ * Anchor primary-600: oklch(0.580 0.0927 148.7) (#518a5b)
+ * Format: OKLCH (hex preserved in comments)
+ *
+ * Structure:
+ *   1. Primitive Tokens — 13 palettes × 11 steps
+ *   2. Semantic Alias — status palettes (success/warning/danger/info)
+ *   3. Semantic Tokens — background / text / border
+ *   4. Interaction State Rules — hover / pressed / disabled
+ *   5. Emphasis Tokens — brand & interaction priority
+ *   6. Status Feedback Tokens — success / warning / danger / info
+ */
+
+:root {
+  /* ========================================
+   * Primitive Tokens — Primary (anchor: 600)
+   * ======================================== */
+  /* primary */
+  --color-primary-50: oklch(0.979 0.0158 148.7);  /* #f1fbf2 */
+  --color-primary-100: oklch(0.953 0.0250 148.7);  /* #e5f4e6 */
+  --color-primary-200: oklch(0.900 0.0343 148.7);  /* #cfe5d2 */
+  --color-primary-300: oklch(0.826 0.0435 148.7);  /* #b3ceb7 */
+  --color-primary-400: oklch(0.738 0.0788 148.7);  /* #88b88f */
+  --color-primary-500: oklch(0.650 0.0880 148.7);  /* #689e71 */
+  --color-primary-600: oklch(0.580 0.0927 148.7);  /* #518a5b */
+  --color-primary-700: oklch(0.484 0.0880 148.7);  /* #386c42 */
+  --color-primary-800: oklch(0.377 0.0788 148.7);  /* #1f4d29 */
+  --color-primary-900: oklch(0.269 0.0649 148.7);  /* #092f13 */
+  --color-primary-950: oklch(0.174 0.0510 148.7);  /* #001604 */
+
+  /* === Primitive: gray === */
+  /* gray */
+  --color-gray-50: oklch(0.975 0.0020 148.7);  /* #f6f7f6 */
+  --color-gray-100: oklch(0.963 0.0034 148.7);  /* #f1f3f1 */
+  --color-gray-200: oklch(0.915 0.0042 148.7);  /* #e1e4e1 */
+  --color-gray-300: oklch(0.850 0.0047 148.7);  /* #cccecc */
+  --color-gray-400: oklch(0.771 0.0049 148.7);  /* #b2b5b3 */
+  --color-gray-500: oklch(0.682 0.0050 148.7);  /* #979a97 */
+  --color-gray-600: oklch(0.583 0.0049 148.7);  /* #797c79 */
+  --color-gray-700: oklch(0.475 0.0047 148.7);  /* #5b5d5b */
+  --color-gray-800: oklch(0.360 0.0042 148.7);  /* #3c3e3c */
+  --color-gray-900: oklch(0.238 0.0034 148.7);  /* #1e1f1e */
+  --color-gray-950: oklch(0.174 0.0020 148.7);  /* #101010 */
+
+  /* === Primitive: blue === */
+  /* blue */
+  --color-blue-50: oklch(0.978 0.0104 262.2);  /* #f4f8ff */
+  --color-blue-100: oklch(0.951 0.0235 262.2);  /* #e6efff */
+  --color-blue-200: oklch(0.896 0.0499 262.2);  /* #cbddff */
+  --color-blue-300: oklch(0.818 0.0634 262.2);  /* #adc4ed */
+  --color-blue-400: oklch(0.727 0.1147 262.2);  /* #7fa6ef */
+  --color-blue-500: oklch(0.635 0.1282 262.2);  /* #5f89d8 */
+  --color-blue-600: oklch(0.562 0.1349 262.2);  /* #4872c4 */
+  --color-blue-700: oklch(0.469 0.1282 262.2);  /* #3157a2 */
+  --color-blue-800: oklch(0.365 0.1147 262.2);  /* #1b3b7a */
+  --color-blue-900: oklch(0.261 0.0944 262.2);  /* #082051 */
+  --color-blue-950: oklch(0.169 0.0742 262.2);  /* #010b2e */
+
+  /* === Primitive: cyan === */
+  /* cyan */
+  --color-cyan-50: oklch(0.980 0.0118 231.0);  /* #f1faff */
+  --color-cyan-100: oklch(0.962 0.0217 231.0);  /* #e5f6ff */
+  --color-cyan-200: oklch(0.927 0.0297 231.0);  /* #d4ebf7 */
+  --color-cyan-300: oklch(0.876 0.0377 231.0);  /* #bedbeb */
+  --color-cyan-400: oklch(0.817 0.0682 231.0);  /* #96cce8 */
+  --color-cyan-500: oklch(0.757 0.0762 231.0);  /* #7dbad8 */
+  --color-cyan-600: oklch(0.710 0.0802 231.0);  /* #6babcb */
+  --color-cyan-700: oklch(0.593 0.0762 231.0);  /* #4b87a3 */
+  --color-cyan-800: oklch(0.461 0.0682 231.0);  /* #2b5f78 */
+  --color-cyan-900: oklch(0.330 0.0562 231.0);  /* #103a4d */
+  --color-cyan-950: oklch(0.213 0.0441 231.0);  /* #001c29 */
+
+  /* === Primitive: purple === */
+  /* purple */
+  --color-purple-50: oklch(0.977 0.0109 278.7);  /* #f6f7ff */
+  --color-purple-100: oklch(0.949 0.0247 278.7);  /* #eaedff */
+  --color-purple-200: oklch(0.892 0.0530 278.7);  /* #d3d9ff */
+  --color-purple-300: oklch(0.811 0.0674 278.7);  /* #b7beed */
+  --color-purple-400: oklch(0.717 0.1218 278.7);  /* #939bef */
+  --color-purple-500: oklch(0.622 0.1361 278.7);  /* #767cd7 */
+  --color-purple-600: oklch(0.546 0.1433 278.7);  /* #6064c2 */
+  --color-purple-700: oklch(0.456 0.1361 278.7);  /* #494aa0 */
+  --color-purple-800: oklch(0.355 0.1218 278.7);  /* #313079 */
+  --color-purple-900: oklch(0.254 0.1003 278.7);  /* #1b1851 */
+  --color-purple-950: oklch(0.164 0.0788 278.7);  /* #0a052e */
+
+  /* === Primitive: yellow === */
+  /* yellow */
+  --color-yellow-50: oklch(0.980 0.0170 84.1);  /* #fef8ec */
+  --color-yellow-100: oklch(0.960 0.0270 84.1);  /* #faf1de */
+  --color-yellow-200: oklch(0.920 0.0370 84.1);  /* #f0e3ca */
+  --color-yellow-300: oklch(0.864 0.0470 84.1);  /* #e1d0b0 */
+  --color-yellow-400: oklch(0.798 0.0850 84.1);  /* #d7b97d */
+  --color-yellow-500: oklch(0.732 0.0950 84.1);  /* #c5a360 */
+  --color-yellow-600: oklch(0.679 0.1000 84.1);  /* #b5934a */
+  --color-yellow-700: oklch(0.567 0.0950 84.1);  /* #91712c */
+  --color-yellow-800: oklch(0.441 0.0850 84.1);  /* #694e0c */
+  --color-yellow-900: oklch(0.316 0.0677 84.1);  /* #422e00 */
+  --color-yellow-950: oklch(0.204 0.0493 84.1);  /* #211400 */
+
+  /* === Primitive: red === */
+  /* red */
+  --color-red-50: oklch(0.978 0.0108 29.0);  /* #fff5f4 */
+  --color-red-100: oklch(0.951 0.0246 29.0);  /* #ffe9e5 */
+  --color-red-200: oklch(0.897 0.0481 29.0);  /* #fbd2cb */
+  --color-red-300: oklch(0.819 0.0611 29.0);  /* #e9b6ad */
+  --color-red-400: oklch(0.728 0.1106 29.0);  /* #e48c7f */
+  --color-red-500: oklch(0.638 0.1236 29.0);  /* #cb6c5f */
+  --color-red-600: oklch(0.565 0.1301 29.0);  /* #b65447 */
+  --color-red-700: oklch(0.472 0.1236 29.0);  /* #943a30 */
+  --color-red-800: oklch(0.367 0.1106 29.0);  /* #6e2119 */
+  --color-red-900: oklch(0.263 0.0911 29.0);  /* #470b07 */
+  --color-red-950: oklch(0.169 0.0715 29.0);  /* #270000 */
+
+  /* === Primitive: orange === */
+  /* orange */
+  --color-orange-50: oklch(0.980 0.0112 50.5);  /* #fff6f2 */
+  --color-orange-100: oklch(0.963 0.0207 50.5);  /* #ffefe7 */
+  --color-orange-200: oklch(0.929 0.0406 50.5);  /* #ffe1d0 */
+  --color-orange-300: oklch(0.881 0.0564 50.5);  /* #f8ceb7 */
+  --color-orange-400: oklch(0.825 0.1020 50.5);  /* #fcb289 */
+  --color-orange-500: oklch(0.768 0.1140 50.5);  /* #ee9e6f */
+  --color-orange-600: oklch(0.723 0.1200 50.5);  /* #e18e5d */
+  --color-orange-700: oklch(0.604 0.1140 50.5);  /* #b76b3d */
+  --color-orange-800: oklch(0.470 0.1020 50.5);  /* #87471e */
+  --color-orange-900: oklch(0.336 0.0840 50.5);  /* #582704 */
+  --color-orange-950: oklch(0.217 0.0656 50.5);  /* #300e00 */
+
+  /* === Primitive: green === */
+  /* green */
+  --color-green-50: oklch(0.980 0.0170 149.2);  /* #f1fcf2 */
+  --color-green-100: oklch(0.957 0.0270 149.2);  /* #e5f6e7 */
+  --color-green-200: oklch(0.910 0.0370 149.2);  /* #d1e9d4 */
+  --color-green-300: oklch(0.844 0.0470 149.2);  /* #b7d5bc */
+  --color-green-400: oklch(0.767 0.0850 149.2);  /* #8dc396 */
+  --color-green-500: oklch(0.689 0.0950 149.2);  /* #70ac7b */
+  --color-green-600: oklch(0.627 0.1000 149.2);  /* #5a9967 */
+  --color-green-700: oklch(0.524 0.0950 149.2);  /* #3e794b */
+  --color-green-800: oklch(0.408 0.0850 149.2);  /* #23562f */
+  --color-green-900: oklch(0.291 0.0700 149.2);  /* #0b3517 */
+  --color-green-950: oklch(0.188 0.0550 149.2);  /* #001a05 */
+
+  /* === Primitive: teal === */
+  /* teal */
+  --color-teal-50: oklch(0.980 0.0101 184.7);  /* #f1fbf9 */
+  --color-teal-100: oklch(0.955 0.0161 184.7);  /* #e5f4f1 */
+  --color-teal-200: oklch(0.905 0.0220 184.7);  /* #d0e5e1 */
+  --color-teal-300: oklch(0.834 0.0280 184.7);  /* #b5cfcb */
+  --color-teal-400: oklch(0.750 0.0506 184.7);  /* #8ab9b2 */
+  --color-teal-500: oklch(0.667 0.0565 184.7);  /* #6ca098 */
+  --color-teal-600: oklch(0.600 0.0595 184.7);  /* #558c85 */
+  --color-teal-700: oklch(0.501 0.0565 184.7);  /* #3b6e68 */
+  --color-teal-800: oklch(0.390 0.0506 184.7);  /* #214e48 */
+  --color-teal-900: oklch(0.279 0.0416 184.7);  /* #0a2f2b */
+  --color-teal-950: oklch(0.180 0.0327 184.7);  /* #001613 */
+
+  /* === Primitive: moss === */
+  /* moss */
+  --color-moss-50: oklch(0.979 0.0141 124.9);  /* #f6faf0 */
+  --color-moss-100: oklch(0.954 0.0225 124.9);  /* #ecf3e2 */
+  --color-moss-200: oklch(0.902 0.0308 124.9);  /* #dae3cd */
+  --color-moss-300: oklch(0.829 0.0391 124.9);  /* #c1ccb1 */
+  --color-moss-400: oklch(0.743 0.0707 124.9);  /* #a2b483 */
+  --color-moss-500: oklch(0.658 0.0790 124.9);  /* #869a64 */
+  --color-moss-600: oklch(0.589 0.0832 124.9);  /* #72864d */
+  --color-moss-700: oklch(0.492 0.0790 124.9);  /* #576935 */
+  --color-moss-800: oklch(0.383 0.0707 124.9);  /* #3b491c */
+  --color-moss-900: oklch(0.274 0.0582 124.9);  /* #212c08 */
+  --color-moss-950: oklch(0.177 0.0458 124.9);  /* #0c1400 */
+
+  /* === Primitive: pink === */
+  /* pink */
+  --color-pink-50: oklch(0.980 0.0108 358.2);  /* #fff6f8 */
+  --color-pink-100: oklch(0.956 0.0240 358.2);  /* #ffeaf0 */
+  --color-pink-200: oklch(0.908 0.0521 358.2);  /* #ffd3e0 */
+  --color-pink-300: oklch(0.840 0.0661 358.2);  /* #f0b9ca */
+  --color-pink-400: oklch(0.760 0.1196 358.2);  /* #ee90b0 */
+  --color-pink-500: oklch(0.680 0.1337 358.2);  /* #d97298 */
+  --color-pink-600: oklch(0.616 0.1407 358.2);  /* #c65c84 */
+  --color-pink-700: oklch(0.515 0.1337 358.2);  /* #a14167 */
+  --color-pink-800: oklch(0.400 0.1196 358.2);  /* #772547 */
+  --color-pink-900: oklch(0.286 0.0985 358.2);  /* #4d0d2a */
+  --color-pink-950: oklch(0.185 0.0774 358.2);  /* #2a0012 */
+
+  /* === Primitive: rose === */
+  /* rose */
+  --color-rose-50: oklch(0.979 0.0104 14.4);  /* #fff5f6 */
+  --color-rose-100: oklch(0.953 0.0237 14.4);  /* #ffe9ea */
+  --color-rose-200: oklch(0.901 0.0484 14.4);  /* #fdd2d4 */
+  --color-rose-300: oklch(0.827 0.0615 14.4);  /* #ecb7ba */
+  --color-rose-400: oklch(0.740 0.1112 14.4);  /* #e88d95 */
+  --color-rose-500: oklch(0.653 0.1243 14.4);  /* #d06e78 */
+  --color-rose-600: oklch(0.583 0.1308 14.4);  /* #bb5663 */
+  --color-rose-700: oklch(0.487 0.1243 14.4);  /* #993c49 */
+  --color-rose-800: oklch(0.379 0.1112 14.4);  /* #71222f */
+  --color-rose-900: oklch(0.271 0.0916 14.4);  /* #490b18 */
+  --color-rose-950: oklch(0.175 0.0720 14.4);  /* #280007 */
+
+  /* === White === */
+  --color-white: oklch(1 0 0);  /* #ffffff */
+
+  /* ========================================
+   * Primitive Tokens — Dark Variants
+   * ======================================== */
+  /* primary-dark */
+  --color-primary-dark-50: oklch(0.174 0.0433 148.7);  /* #021506 */
+  --color-primary-dark-100: oklch(0.269 0.0551 148.7);  /* #102e17 */
+  --color-primary-dark-200: oklch(0.377 0.0669 148.7);  /* #264b2d */
+  --color-primary-dark-300: oklch(0.484 0.0748 148.7);  /* #3f6b47 */
+  --color-primary-dark-400: oklch(0.580 0.0788 148.7);  /* #588760 */
+  --color-primary-dark-500: oklch(0.650 0.0748 148.7);  /* #6f9c76 */
+  --color-primary-dark-600: oklch(0.738 0.0669 148.7);  /* #8db693 */
+  --color-primary-dark-700: oklch(0.826 0.0370 148.7);  /* #b6cdb9 */
+  --color-primary-dark-800: oklch(0.900 0.0291 148.7);  /* #d2e4d4 */
+  --color-primary-dark-900: oklch(0.953 0.0213 148.7);  /* #e6f4e8 */
+  --color-primary-dark-950: oklch(0.979 0.0134 148.7);  /* #f2fbf3 */
+
+  /* gray-dark */
+  --color-gray-dark-50: oklch(0.130 0.0017 148.7);  /* #070707 */
+  --color-gray-dark-100: oklch(0.180 0.0029 148.7);  /* #111211 */
+  --color-gray-dark-200: oklch(0.230 0.0036 148.7);  /* #1c1d1c */
+  --color-gray-dark-300: oklch(0.290 0.0040 148.7);  /* #2a2c2a */
+  --color-gray-dark-400: oklch(0.380 0.0042 148.7);  /* #414341 */
+  --color-gray-dark-500: oklch(0.500 0.0043 148.7);  /* #626462 */
+  --color-gray-dark-600: oklch(0.620 0.0042 148.7);  /* #848785 */
+  --color-gray-dark-700: oklch(0.750 0.0040 148.7);  /* #acafac */
+  --color-gray-dark-800: oklch(0.870 0.0036 148.7);  /* #d3d5d3 */
+  --color-gray-dark-900: oklch(0.940 0.0029 148.7);  /* #eaecea */
+  --color-gray-dark-950: oklch(0.980 0.0017 148.7);  /* #f8f9f8 */
+
+  /* blue-dark */
+  --color-blue-dark-50: oklch(0.169 0.0631 262.2);  /* #020d2a */
+  --color-blue-dark-100: oklch(0.261 0.0803 262.2);  /* #0d224b */
+  --color-blue-dark-200: oklch(0.365 0.0975 262.2);  /* #213c71 */
+  --color-blue-dark-300: oklch(0.469 0.1090 262.2);  /* #385997 */
+  --color-blue-dark-400: oklch(0.562 0.1147 262.2);  /* #4f74b8 */
+  --color-blue-dark-500: oklch(0.635 0.1090 262.2);  /* #668acd */
+  --color-blue-dark-600: oklch(0.727 0.0975 262.2);  /* #85a7e4 */
+  --color-blue-dark-700: oklch(0.818 0.0539 262.2);  /* #b1c4e7 */
+  --color-blue-dark-800: oklch(0.896 0.0424 262.2);  /* #ceddfa */
+  --color-blue-dark-900: oklch(0.951 0.0200 262.2);  /* #e8effd */
+  --color-blue-dark-950: oklch(0.978 0.0089 262.2);  /* #f5f8fe */
+
+  /* cyan-dark */
+  --color-cyan-dark-50: oklch(0.213 0.0375 231.0);  /* #041c27 */
+  --color-cyan-dark-100: oklch(0.330 0.0477 231.0);  /* #183a49 */
+  --color-cyan-dark-200: oklch(0.461 0.0580 231.0);  /* #345e73 */
+  --color-cyan-dark-300: oklch(0.593 0.0648 231.0);  /* #54859e */
+  --color-cyan-dark-400: oklch(0.710 0.0682 231.0);  /* #75aac5 */
+  --color-cyan-dark-500: oklch(0.757 0.0648 231.0);  /* #86b8d2 */
+  --color-cyan-dark-600: oklch(0.817 0.0580 231.0);  /* #9dcbe2 */
+  --color-cyan-dark-700: oklch(0.876 0.0321 231.0);  /* #c2dbe8 */
+  --color-cyan-dark-800: oklch(0.927 0.0252 231.0);  /* #d7eaf5 */
+  --color-cyan-dark-900: oklch(0.962 0.0184 231.0);  /* #e7f5fd */
+  --color-cyan-dark-950: oklch(0.980 0.0101 231.0);  /* #f2fafe */
+
+  /* purple-dark */
+  --color-purple-dark-50: oklch(0.164 0.0670 278.7);  /* #0a082a */
+  --color-purple-dark-100: oklch(0.254 0.0853 278.7);  /* #1b1b4a */
+  --color-purple-dark-200: oklch(0.355 0.1035 278.7);  /* #313370 */
+  --color-purple-dark-300: oklch(0.456 0.1157 278.7);  /* #4a4d96 */
+  --color-purple-dark-400: oklch(0.546 0.1218 278.7);  /* #6267b6 */
+  --color-purple-dark-500: oklch(0.622 0.1157 278.7);  /* #787ecb */
+  --color-purple-dark-600: oklch(0.717 0.1035 278.7);  /* #959de4 */
+  --color-purple-dark-700: oklch(0.811 0.0572 278.7);  /* #b9bee7 */
+  --color-purple-dark-800: oklch(0.892 0.0451 278.7);  /* #d4d9fa */
+  --color-purple-dark-900: oklch(0.949 0.0210 278.7);  /* #ebedfd */
+  --color-purple-dark-950: oklch(0.977 0.0093 278.7);  /* #f6f7fe */
+
+  /* yellow-dark */
+  --color-yellow-dark-50: oklch(0.204 0.0419 84.1);  /* #201500 */
+  --color-yellow-dark-100: oklch(0.316 0.0576 84.1);  /* #3f2f08 */
+  --color-yellow-dark-200: oklch(0.441 0.0723 84.1);  /* #664f1e */
+  --color-yellow-dark-300: oklch(0.567 0.0808 84.1);  /* #8d723b */
+  --color-yellow-dark-400: oklch(0.679 0.0850 84.1);  /* #b19459 */
+  --color-yellow-dark-500: oklch(0.732 0.0808 84.1);  /* #c0a46c */
+  --color-yellow-dark-600: oklch(0.798 0.0723 84.1);  /* #d3ba88 */
+  --color-yellow-dark-700: oklch(0.864 0.0399 84.1);  /* #dfd1b5 */
+  --color-yellow-dark-800: oklch(0.920 0.0314 84.1);  /* #efe4ce */
+  --color-yellow-dark-900: oklch(0.960 0.0230 84.1);  /* #f9f1e1 */
+  --color-yellow-dark-950: oklch(0.980 0.0145 84.1);  /* #fdf8ee */
+
+  /* red-dark */
+  --color-red-dark-50: oklch(0.169 0.0608 29.0);  /* #240201 */
+  --color-red-dark-100: oklch(0.263 0.0774 29.0);  /* #43110d */
+  --color-red-dark-200: oklch(0.367 0.0940 29.0);  /* #682820 */
+  --color-red-dark-300: oklch(0.472 0.1050 29.0);  /* #8d4138 */
+  --color-red-dark-400: oklch(0.565 0.1106 29.0);  /* #ad5a4f */
+  --color-red-dark-500: oklch(0.638 0.1050 29.0);  /* #c37266 */
+  --color-red-dark-600: oklch(0.728 0.0940 29.0);  /* #dc9185 */
+  --color-red-dark-700: oklch(0.819 0.0520 29.0);  /* #e4b8b1 */
+  --color-red-dark-800: oklch(0.897 0.0409 29.0);  /* #f7d3ce */
+  --color-red-dark-900: oklch(0.951 0.0209 29.0);  /* #fdeae7 */
+  --color-red-dark-950: oklch(0.978 0.0092 29.0);  /* #fef6f4 */
+
+  /* orange-dark */
+  --color-orange-dark-50: oklch(0.217 0.0558 50.5);  /* #2d1000 */
+  --color-orange-dark-100: oklch(0.336 0.0714 50.5);  /* #532a10 */
+  --color-orange-dark-200: oklch(0.470 0.0867 50.5);  /* #814b2b */
+  --color-orange-dark-300: oklch(0.604 0.0969 50.5);  /* #b0704a */
+  --color-orange-dark-400: oklch(0.723 0.1020 50.5);  /* #d9926a */
+  --color-orange-dark-500: oklch(0.768 0.0969 50.5);  /* #e6a27b */
+  --color-orange-dark-600: oklch(0.825 0.0867 50.5);  /* #f4b693 */
+  --color-orange-dark-700: oklch(0.881 0.0479 50.5);  /* #f3d0bc */
+  --color-orange-dark-800: oklch(0.929 0.0345 50.5);  /* #fce2d3 */
+  --color-orange-dark-900: oklch(0.963 0.0176 50.5);  /* #fdf0e8 */
+  --color-orange-dark-950: oklch(0.980 0.0095 50.5);  /* #fef7f3 */
+
+  /* green-dark */
+  --color-green-dark-50: oklch(0.188 0.0468 149.2);  /* #021907 */
+  --color-green-dark-100: oklch(0.291 0.0595 149.2);  /* #13341b */
+  --color-green-dark-200: oklch(0.408 0.0723 149.2);  /* #2b5434 */
+  --color-green-dark-300: oklch(0.524 0.0808 149.2);  /* #477750 */
+  --color-green-dark-400: oklch(0.627 0.0850 149.2);  /* #63976c */
+  --color-green-dark-500: oklch(0.689 0.0808 149.2);  /* #77a980 */
+  --color-green-dark-600: oklch(0.767 0.0723 149.2);  /* #93c19a */
+  --color-green-dark-700: oklch(0.844 0.0399 149.2);  /* #bbd4be */
+  --color-green-dark-800: oklch(0.910 0.0314 149.2);  /* #d4e8d6 */
+  --color-green-dark-900: oklch(0.957 0.0230 149.2);  /* #e7f5e9 */
+  --color-green-dark-950: oklch(0.980 0.0145 149.2);  /* #f2fbf3 */
+
+  /* teal-dark */
+  --color-teal-dark-50: oklch(0.180 0.0278 184.7);  /* #021613 */
+  --color-teal-dark-100: oklch(0.279 0.0354 184.7);  /* #122e2b */
+  --color-teal-dark-200: oklch(0.390 0.0430 184.7);  /* #284d48 */
+  --color-teal-dark-300: oklch(0.501 0.0480 184.7);  /* #436d67 */
+  --color-teal-dark-400: oklch(0.600 0.0506 184.7);  /* #5d8a84 */
+  --color-teal-dark-500: oklch(0.667 0.0480 184.7);  /* #739e98 */
+  --color-teal-dark-600: oklch(0.750 0.0430 184.7);  /* #90b7b1 */
+  --color-teal-dark-700: oklch(0.834 0.0238 184.7);  /* #b8ceca */
+  --color-teal-dark-800: oklch(0.905 0.0187 184.7);  /* #d3e4e1 */
+  --color-teal-dark-900: oklch(0.955 0.0137 184.7);  /* #e7f3f1 */
+  --color-teal-dark-950: oklch(0.980 0.0086 184.7);  /* #f2faf9 */
+
+  /* moss-dark */
+  --color-moss-dark-50: oklch(0.177 0.0389 124.9);  /* #0d1402 */
+  --color-moss-dark-100: oklch(0.274 0.0495 124.9);  /* #222b0e */
+  --color-moss-dark-200: oklch(0.383 0.0601 124.9);  /* #3c4924 */
+  --color-moss-dark-300: oklch(0.492 0.0672 124.9);  /* #58683c */
+  --color-moss-dark-400: oklch(0.589 0.0707 124.9);  /* #738556 */
+  --color-moss-dark-500: oklch(0.658 0.0672 124.9);  /* #88996c */
+  --color-moss-dark-600: oklch(0.743 0.0601 124.9);  /* #a3b38a */
+  --color-moss-dark-700: oklch(0.829 0.0332 124.9);  /* #c2cbb4 */
+  --color-moss-dark-800: oklch(0.902 0.0262 124.9);  /* #dbe2cf */
+  --color-moss-dark-900: oklch(0.954 0.0191 124.9);  /* #edf2e4 */
+  --color-moss-dark-950: oklch(0.979 0.0120 124.9);  /* #f6faf1 */
+
+  /* pink-dark */
+  --color-pink-dark-50: oklch(0.185 0.0658 358.2);  /* #270312 */
+  --color-pink-dark-100: oklch(0.286 0.0837 358.2);  /* #49142a */
+  --color-pink-dark-200: oklch(0.400 0.1017 358.2);  /* #712c47 */
+  --color-pink-dark-300: oklch(0.515 0.1136 358.2);  /* #9a4867 */
+  --color-pink-dark-400: oklch(0.616 0.1196 358.2);  /* #bd6484 */
+  --color-pink-dark-500: oklch(0.680 0.1136 358.2);  /* #d07998 */
+  --color-pink-dark-600: oklch(0.760 0.1017 358.2);  /* #e696b0 */
+  --color-pink-dark-700: oklch(0.840 0.0562 358.2);  /* #eabcca */
+  --color-pink-dark-800: oklch(0.908 0.0443 358.2);  /* #fbd5e0 */
+  --color-pink-dark-900: oklch(0.956 0.0204 358.2);  /* #fdebf0 */
+  --color-pink-dark-950: oklch(0.980 0.0092 358.2);  /* #fef6f8 */
+
+  /* rose-dark */
+  --color-rose-dark-50: oklch(0.175 0.0612 14.4);  /* #250208 */
+  --color-rose-dark-100: oklch(0.271 0.0778 14.4);  /* #45121a */
+  --color-rose-dark-200: oklch(0.379 0.0945 14.4);  /* #6b2932 */
+  --color-rose-dark-300: oklch(0.487 0.1056 14.4);  /* #91434d */
+  --color-rose-dark-400: oklch(0.583 0.1112 14.4);  /* #b35d66 */
+  --color-rose-dark-500: oklch(0.653 0.1056 14.4);  /* #c8747c */
+  --color-rose-dark-600: oklch(0.740 0.0945 14.4);  /* #e09298 */
+  --color-rose-dark-700: oklch(0.827 0.0523 14.4);  /* #e6b9bc */
+  --color-rose-dark-800: oklch(0.901 0.0411 14.4);  /* #f8d4d6 */
+  --color-rose-dark-900: oklch(0.953 0.0201 14.4);  /* #fdeaeb */
+  --color-rose-dark-950: oklch(0.979 0.0088 14.4);  /* #fef6f6 */
+
+  /* ========================================
+   * Semantic Alias — Status Palettes
+   * ======================================== */
+  --color-success-50: var(--color-green-50);
+  --color-success-100: var(--color-green-100);
+  --color-success-200: var(--color-green-200);
+  --color-success-300: var(--color-green-300);
+  --color-success-400: var(--color-green-400);
+  --color-success-500: var(--color-green-500);
+  --color-success-600: var(--color-green-600);
+  --color-success-700: var(--color-green-700);
+  --color-success-800: var(--color-green-800);
+  --color-success-900: var(--color-green-900);
+  --color-success-950: var(--color-green-950);
+
+  --color-warning-50: var(--color-orange-50);
+  --color-warning-100: var(--color-orange-100);
+  --color-warning-200: var(--color-orange-200);
+  --color-warning-300: var(--color-orange-300);
+  --color-warning-400: var(--color-orange-400);
+  --color-warning-500: var(--color-orange-500);
+  --color-warning-600: var(--color-orange-600);
+  --color-warning-700: var(--color-orange-700);
+  --color-warning-800: var(--color-orange-800);
+  --color-warning-900: var(--color-orange-900);
+  --color-warning-950: var(--color-orange-950);
+
+  --color-danger-50: var(--color-rose-50);
+  --color-danger-100: var(--color-rose-100);
+  --color-danger-200: var(--color-rose-200);
+  --color-danger-300: var(--color-rose-300);
+  --color-danger-400: var(--color-rose-400);
+  --color-danger-500: var(--color-rose-500);
+  --color-danger-600: var(--color-rose-600);
+  --color-danger-700: var(--color-rose-700);
+  --color-danger-800: var(--color-rose-800);
+  --color-danger-900: var(--color-rose-900);
+  --color-danger-950: var(--color-rose-950);
+
+  --color-info-50: var(--color-blue-50);
+  --color-info-100: var(--color-blue-100);
+  --color-info-200: var(--color-blue-200);
+  --color-info-300: var(--color-blue-300);
+  --color-info-400: var(--color-blue-400);
+  --color-info-500: var(--color-blue-500);
+  --color-info-600: var(--color-blue-600);
+  --color-info-700: var(--color-blue-700);
+  --color-info-800: var(--color-blue-800);
+  --color-info-900: var(--color-blue-900);
+  --color-info-950: var(--color-blue-950);
+
+  /* ========================================
+   * Semantic Tokens — Background
+   * ======================================== */
+  --color-bg-base: var(--color-white);  /* 页面根背景、应用主画布；Input/文本域基础背景 */
+  --color-bg-surface: var(--color-gray-50);  /* Sidebar、对话气泡、表格行 hover、Skeleton */
+  --color-bg-overlay: var(--color-white);  /* Header、Popover、Dropdown、Modal、Drawer 等浮层容器 */
+  --color-bg-muted: var(--color-gray-100);  /* Sidebar 选中、Avatar、表头等弱强调背景 */
+  --color-bg-control: var(--color-white);  /* Switch/Checkbox/Radio 等小控件容器背景 */
+  --color-bg-inverse: var(--color-gray-950);  /* Tooltip 等需与浅色容器形成强反差的反色背景 */
+  --color-bg-primary: var(--color-primary-600);  /* 主按钮、关键确认操作的 CTA 背景 */
+  --color-bg-secondary: var(--color-gray-100);  /* 次按钮、模板示例、低强调控件默认背景 */
+
+  /* ========================================
+   * Semantic Tokens — Text & Icon
+   * ======================================== */
+  --color-text-primary: var(--color-gray-950);  /* 标题、正文、段落、列表项、浅色按钮等主要文字 */
+  --color-text-secondary: var(--color-gray-800);  /* 描述、辅助信息；AI 引用源、工具调用结果摘要 */
+  --color-text-tertiary: var(--color-gray-600);  /* Input/Composer 占位、Sidebar 分组标题、Stepper 待办态 */
+  --color-text-disable: var(--color-gray-400);  /* 禁用按钮、禁用输入、禁用菜单 */
+  --color-text-foreground: var(--color-white);  /* Tooltip、深色按钮等深色背景上的反色文字 */
+  --color-text-accent: var(--color-primary-600);  /* 链接颜色、可交互高亮文字、强调数值 */
+  --color-icon-primary: var(--color-text-secondary);  /* 主要 icon：与辅助文字同层级（引用 text-secondary） */
+  --color-icon-secondary: var(--color-text-tertiary);  /* 辅助 icon（引用 text-tertiary） */
+  --color-icon-disable: var(--color-text-disable);  /* 禁用 icon */
+  --color-icon-foreground: var(--color-text-foreground);  /* 反色 icon */
+  --color-icon-accent: var(--color-text-accent);  /* 强调/可交互 icon（链接图标等） */
+
+  /* ========================================
+   * Semantic Tokens — Border
+   * ======================================== */
+  --color-border-default: var(--color-gray-300);  /* 结构分隔：卡片、面板、表格行间分隔线 */
+  --color-border-strong: var(--color-gray-400);  /* 增强识别：输入框、按钮的默认描边 */
+  --color-border-interactive: var(--color-primary-600);  /* 可交互组件 hover 描边 */
+  --color-border-interactive-active: var(--color-primary-700);  /* 可交互组件 active/focus 描边（focus ring 基色） */
+
+  /* ========================================
+   * Status Feedback Tokens - Text
+   * ======================================== */
+  --color-text-success: var(--color-success-700);  /* 成功 Tag、日志成功信息、任务完成状态 */
+  --color-text-warning: var(--color-warning-700);  /* 警告 Tag、风险提示文案、需关注状态说明 */
+  --color-text-danger: var(--color-danger-700);  /* 错误态文本、异常日志、删除/停止等危险操作 */
+  --color-text-info: var(--color-info-700);  /* 系统消息、说明性提示、信息通知 */
+
+  /* ========================================
+   * Status Feedback Tokens - Background
+   * ======================================== */
+  --color-bg-success: var(--color-success-600);  /* 成功背景：成功 Toast、Tag 容器 */
+  --color-bg-warning: var(--color-warning-600);  /* 警告背景：警告 Toast、Tag 容器 */
+  --color-bg-danger: var(--color-danger-600);  /* 危险背景：错误 Toast、删除确认容器 */
+  --color-bg-info: var(--color-info-600);  /* 信息背景：信息 Toast、说明容器 */
+  --color-bg-success-secondary: var(--color-success-100);
+  --color-bg-warning-secondary: var(--color-warning-100);
+  --color-bg-danger-secondary: var(--color-danger-100);
+  --color-bg-info-secondary: var(--color-info-100);
+
+  /* ========================================
+   * Status Feedback Tokens - Border
+   * ======================================== */
+  --color-border-success: var(--color-success-300);
+  --color-border-warning: var(--color-warning-300);
+  --color-border-danger: var(--color-danger-300);
+  --color-border-info: var(--color-info-300);
+
+  /* ========================================
+   * Height Tokens
+   * ======================================== */
+  --height-small: 28px;
+  --height-default: 32px;
+  --height-large: 36px;
+
+  /* ========================================
+   * Interaction State Rules (Recipe Tokens)
+   * ======================================== */
+  --state-hover-solid-ratio: 90%;  /* 深色按钮 hover：底色保留比例 */
+  --state-hover-solid-mix: var(--color-white);  /* 深色按钮 hover：混入颜色（变亮） */
+  --state-pressed-solid-ratio: 95%;  /* 深色按钮 press：底色保留比例 */
+  --state-pressed-solid-mix: var(--color-gray-900);  /* 深色按钮 press：混入颜色（变暗） */
+  --state-hover-subtle-ratio: 97%;  /* 浅色按钮 hover：底色保留比例 */
+  --state-hover-subtle-mix: var(--color-gray-900);  /* 浅色按钮 hover：混入颜色 */
+  --state-pressed-subtle-ratio: 95%;  /* 浅色按钮 press：底色保留比例 */
+  --state-pressed-subtle-mix: var(--color-gray-900);  /* 浅色按钮 press：混入颜色 */
+  --state-disabled-ratio: 50%;  /* Disabled 状态 opacity */
+
+  /* ========================================
+   * Spacing Tokens
+   * ======================================== */
+  --space-xxxs: 4px;  /* 微间距：图标与文字、Tag 内边距 */
+  --space-xxs: 8px;  /* 小间距：按钮 padding、小组件间距 */
+  --space-xs: 12px;  /* 表单项间距、紧凑卡片内边距 */
+  --space-s: 16px;  /* 基础间距：模块间距、默认卡片内边距 */
+  --space-m: 20px;  /* 区块分隔、侧边栏内边距 */
+  --space-l: 24px;  /* 页面 section 间距、弹层内容 padding */
+  --space-xl: 32px;  /* 页面主区块之间 */
+  --space-xxl: 40px;  /* 大页面留白、顶级容器 padding */
+
+  /* ========================================
+   * Radius Tokens
+   * ======================================== */
+  --radius-xs: 4px;  /* Tag / Badge / 缩略图 */
+  --radius-sm: 6px;  /* 小尺寸按钮、mini 输入框 */
+  --radius-md: 8px;  /* 基础输入框、按钮、卡片、下拉/弹层 */
+  --radius-lg: 12px;  /* 大卡片、Popover / Dropdown、信息面板 */
+  --radius-xl: 16px;  /* Modal / Drawer、主内容面板 */
+  --radius-2xl: 20px;  /* Chatbot input、搜索框等大圆角输入容器 */
+  --radius-full: 99px;  /* Pill 按钮、Chip、胶囊形输入 */
+
+  /* ========================================
+   * Shadow Tokens (Light)
+   * ======================================== */
+  --shadow-sm: 0 1px 3px -1px rgba(16,16,19,0.080), 0 1px 8px 0 rgba(16,16,19,0.050);  /* 小层级：下拉菜单 */
+  --shadow-md: 0 2px 4px -2px rgba(16,16,19,0.050), 0 4px 26px -1px rgba(16,16,19,0.050);  /* 高层级：alert / message / tooltip / popover */
+  --shadow-lg: 0 8px 10px -2px rgba(16,16,19,0.050), 0 20px 25px -3px rgba(16,16,19,0.050);  /* 顶层强调：抽屉 / 弹窗 */
+
+  /* ========================================
+   * Typography Tokens — Font Family
+   * ======================================== */
+  --font-cn: 'PingFang SC', -apple-system, 'Noto Sans SC', 'Microsoft YaHei', sans-serif;  /* 中文界面：页面正文、卡片内容、导航菜单、表单标签 */
+  --font-en: 'JetBrains Mono', 'SF Pro Display', 'Roboto', 'Geist', 'Helvetica Neue', Helvetica, Arial, sans-serif;  /* 英文/数字：仪表盘数据、版本号、API 文档、纯英文段落 */
+  --font-mono: 'Geist Mono', 'SF Mono', 'Fira Code', ui-monospace, monospace;  /* 等宽字体：代码块、日志输出、JSON、终端命令、文件路径 */
+  --font-sans: var(--font-cn);  /* 默认 body 字体，中文优先 */
+
+  /* === Font Weight === */
+  --font-weight-normal: 400;  /* 正文 / 说明文本 */
+  --font-weight-medium: 500;  /* 按钮 / Tab / 强调正文 */
+  --font-weight-semibold: 600;  /* 标题 / 表头 / 关键数值 */
+  --font-weight-bold: 700;  /* 强强调：少量关键标题或品牌语 */
+
+  /* === Font Size === */
+  --text-page-title: 36px;  /* 页面主标题 / Hero */
+  --text-page-title-secondary: 32px;  /* 页面二级主标题 */
+  --text-panel-title-lg: 30px;  /* 大面板标题 */
+  --text-dialog-title: 24px;  /* 弹窗 / 区块主标题 */
+  --text-section-title: 20px;  /* 区块标题 */
+  --text-subsection-title: 18px;  /* 分组标题 / 副标题 */
+  --text-ui-strong: 16px;  /* 按钮 / 表头 / 强调正文 */
+  --text-body: 14px;  /* 正文默认 */
+  --text-body-sm: 13px;  /* 次级 / 辅助正文 */
+  --text-caption: 12px;  /* 注释 / 时间戳 / Caption */
+
+  /* === Line Height === */
+  --line-height-display: 1.2;  /* 展示级标题：更紧凑 */
+  --line-height-display-1: 1.3;  /* 展示级标题：多行可读性更好 */
+  --line-height-title: 1.4;  /* 标题：兼顾密度与可读性 */
+  --line-height-body: 1.5;  /* 正文：默认阅读行高 */
+  --line-height-mono: 1.6;  /* 等宽：代码 / 日志 / 数据列 */
+
+  /* === Letter Spacing === */
+  --letter-spacing-display-3: -0.03em;  /* 大标题：收紧字距，增强视觉张力 */
+  --letter-spacing-display-2: -0.02em;  /* 标题：轻微收紧 */
+  --letter-spacing-display-1: -0.01em;  /* 标题 / 强调：极轻微收紧 */
+  --letter-spacing-normal: 0;  /* 正文 / 默认 */
+
+  /* ========================================
+   * Stroke Tokens
+   * ======================================== */
+  --stroke-1: 1px;  /* 增强描边：需稳定识别的边框 */
+  --stroke-2: 2px;  /* Focus 描边：选中态、focus ring */
+  --stroke-0_5: 0.5px;  /* 默认描边：输入框 / 按钮 / 卡片 / 标签 */
+  --stroke-weight-base: var(--stroke-0_5);  /* 描边别名：默认 */
+  --stroke-weight-strong: var(--stroke-1);  /* 描边别名：增强 */
+  --stroke-weight-bold: var(--stroke-2);  /* 描边别名：Focus */
+
+  /* ========================================
+   * Motion Tokens
+   * ======================================== */
+  --motion-fast: 150ms;  /* 微交互：按钮按压、checkbox/radio 切换 */
+  --motion-base: 250ms;  /* 状态切换：菜单展开、tooltip、tab */
+  --motion-slow: 400ms;  /* 布局变化：accordion / modal / drawer */
+  --ease-enter: cubic-bezier(0.16, 1, 0.3, 1);  /* 元素进入（出现/展开） */
+  --ease-exit: cubic-bezier(0.7, 0, 0.84, 0);  /* 元素退出（消失/收起） */
+  --ease-standard: cubic-bezier(0.65, 0, 0.35, 1);  /* 双向切换（toggle / tab） */
+}
+
+/* ============================================
+ * Dark Mode
+ * ============================================ */
+.dark {
+  /* Status Alias (Dark) */
+  --color-success-50: var(--color-green-dark-50);
+  --color-success-100: var(--color-green-dark-100);
+  --color-success-200: var(--color-green-dark-200);
+  --color-success-300: var(--color-green-dark-300);
+  --color-success-400: var(--color-green-dark-400);
+  --color-success-500: var(--color-green-dark-500);
+  --color-success-600: var(--color-green-dark-600);
+  --color-success-700: var(--color-green-dark-700);
+  --color-success-800: var(--color-green-dark-800);
+  --color-success-900: var(--color-green-dark-900);
+  --color-success-950: var(--color-green-dark-950);
+
+  --color-warning-50: var(--color-orange-dark-50);
+  --color-warning-100: var(--color-orange-dark-100);
+  --color-warning-200: var(--color-orange-dark-200);
+  --color-warning-300: var(--color-orange-dark-300);
+  --color-warning-400: var(--color-orange-dark-400);
+  --color-warning-500: var(--color-orange-dark-500);
+  --color-warning-600: var(--color-orange-dark-600);
+  --color-warning-700: var(--color-orange-dark-700);
+  --color-warning-800: var(--color-orange-dark-800);
+  --color-warning-900: var(--color-orange-dark-900);
+  --color-warning-950: var(--color-orange-dark-950);
+
+  --color-danger-50: var(--color-rose-dark-50);
+  --color-danger-100: var(--color-rose-dark-100);
+  --color-danger-200: var(--color-rose-dark-200);
+  --color-danger-300: var(--color-rose-dark-300);
+  --color-danger-400: var(--color-rose-dark-400);
+  --color-danger-500: var(--color-rose-dark-500);
+  --color-danger-600: var(--color-rose-dark-600);
+  --color-danger-700: var(--color-rose-dark-700);
+  --color-danger-800: var(--color-rose-dark-800);
+  --color-danger-900: var(--color-rose-dark-900);
+  --color-danger-950: var(--color-rose-dark-950);
+
+  --color-info-50: var(--color-blue-dark-50);
+  --color-info-100: var(--color-blue-dark-100);
+  --color-info-200: var(--color-blue-dark-200);
+  --color-info-300: var(--color-blue-dark-300);
+  --color-info-400: var(--color-blue-dark-400);
+  --color-info-500: var(--color-blue-dark-500);
+  --color-info-600: var(--color-blue-dark-600);
+  --color-info-700: var(--color-blue-dark-700);
+  --color-info-800: var(--color-blue-dark-800);
+  --color-info-900: var(--color-blue-dark-900);
+  --color-info-950: var(--color-blue-dark-950);
+
+  /* Background (Dark) */
+  --color-bg-base: var(--color-gray-dark-50);
+  --color-bg-surface: var(--color-gray-dark-100);
+  --color-bg-overlay: var(--color-gray-dark-200);
+  --color-bg-muted: var(--color-gray-dark-200);
+  --color-bg-control: var(--color-gray-dark-200);
+  --color-bg-inverse: var(--color-gray-dark-950);
+  --color-bg-primary: var(--color-primary-dark-600);
+  --color-bg-secondary: var(--color-gray-dark-200);
+
+  /* Text & Icon (Dark) */
+  --color-text-primary: var(--color-gray-dark-950);
+  --color-text-secondary: var(--color-gray-dark-800);
+  --color-text-tertiary: var(--color-gray-dark-600);
+  --color-text-disable: var(--color-primary-dark-400);
+  --color-text-foreground: var(--color-gray-dark-50);
+  --color-text-accent: var(--color-primary-dark-600);
+  --color-icon-primary: var(--color-text-secondary);
+  --color-icon-secondary: var(--color-text-tertiary);
+  --color-icon-disable: var(--color-text-disable);
+  --color-icon-foreground: var(--color-text-foreground);
+  --color-icon-accent: var(--color-text-accent);
+
+  /* Border (Dark) */
+  --color-border-default: var(--color-gray-dark-300);
+  --color-border-strong: var(--color-gray-dark-400);
+  --color-border-interactive: var(--color-primary-dark-500);
+  --color-border-interactive-active: var(--color-primary-dark-700);
+
+  /* Status Feedback - Text (Dark) */
+  --color-text-success: var(--color-success-700);
+  --color-text-warning: var(--color-warning-700);
+  --color-text-danger: var(--color-danger-700);
+  --color-text-info: var(--color-info-700);
+
+  /* Status Feedback - Background (Dark) */
+  --color-bg-success: var(--color-success-600);
+  --color-bg-warning: var(--color-warning-600);
+  --color-bg-danger: var(--color-danger-600);
+  --color-bg-info: var(--color-info-600);
+  --color-bg-success-secondary: var(--color-success-100);
+  --color-bg-warning-secondary: var(--color-warning-100);
+  --color-bg-danger-secondary: var(--color-danger-100);
+  --color-bg-info-secondary: var(--color-info-100);
+
+  /* Status Feedback - Border (Dark) */
+  --color-border-success: var(--color-success-300);
+  --color-border-warning: var(--color-warning-300);
+  --color-border-danger: var(--color-danger-300);
+  --color-border-info: var(--color-info-300);
+
+  /* Interaction State Rules (Dark) */
+  --state-hover-solid-ratio: 90%;
+  --state-hover-solid-mix: var(--color-gray-dark-50);
+  --state-pressed-solid-ratio: 95%;
+  --state-pressed-solid-mix: var(--color-gray-dark-50);
+  --state-hover-subtle-ratio: 97%;
+  --state-hover-subtle-mix: var(--color-gray-dark-950);
+  --state-pressed-subtle-ratio: 95%;
+  --state-pressed-subtle-mix: var(--color-gray-dark-950);
+  --state-disabled-ratio: 50%;
+
+  /* Shadow (Dark Mode) */
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.2), 0 1px 2px -1px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -4px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
+}
