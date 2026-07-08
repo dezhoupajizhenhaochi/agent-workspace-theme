@@ -1,12 +1,14 @@
 <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
   <rect width="48" height="48" rx="14" fill="url(#runner-bg)"/>
-  <path d="M24 10a14 14 0 1 0 12.2 7.1" stroke="white" stroke-opacity=".94" stroke-width="4" stroke-linecap="round"/>
-  <path d="M33 9v10h-10" stroke="white" stroke-opacity=".94" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M20 22l8 4-8 4v-8Z" fill="white"/>
+  <path d="M36 19a13 13 0 1 1-5.1-6.2" stroke="white" stroke-width="4" stroke-linecap="round"/>
+  <path d="M31 9h7v7" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M20 20.5 28.5 25 20 29.5v-9Z" fill="white"/>
+  <path d="M14 25h3" stroke="white" stroke-opacity=".65" stroke-width="2.2" stroke-linecap="round"/>
   <defs>
-    <linearGradient id="runner-bg" x1="8" y1="4" x2="42" y2="44" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#7CE8B6"/>
-      <stop offset="1" stop-color="#128653"/>
+    <linearGradient id="runner-bg" x1="7" y1="5" x2="42" y2="44" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#78E7B3"/>
+      <stop offset=".52" stop-color="#32BC7A"/>
+      <stop offset="1" stop-color="#0A7D4E"/>
     </linearGradient>
   </defs>
 </svg>

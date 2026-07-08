@@ -1,12 +1,14 @@
 <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
   <rect width="48" height="48" rx="14" fill="url(#research-bg)"/>
-  <circle cx="23" cy="22" r="9" fill="white" fill-opacity=".92"/>
-  <path d="M30 29L36 35" stroke="#22734F" stroke-width="4" stroke-linecap="round"/>
-  <path d="M15 22h16M23 14c3 4 3 12 0 16M15 22c2.7-3.2 13.3-3.2 16 0M15 22c2.7 3.2 13.3 3.2 16 0" stroke="#22734F" stroke-width="1.6" stroke-linecap="round"/>
+  <circle cx="21" cy="21" r="8.5" fill="white" fill-opacity=".95"/>
+  <path d="M26.8 26.8 34.5 34.5" stroke="white" stroke-width="4" stroke-linecap="round"/>
+  <path d="M14.5 21h13M21 14.5c2.4 3.2 2.4 9.8 0 13M16.2 16.6c2.9 2.1 6.7 2.1 9.6 0M16.2 25.4c2.9-2.1 6.7-2.1 9.6 0" stroke="#178055" stroke-width="1.8" stroke-linecap="round"/>
+  <path d="M31.5 31.5 34.5 34.5" stroke="#178055" stroke-width="1.5" stroke-linecap="round"/>
   <defs>
-    <linearGradient id="research-bg" x1="8" y1="5" x2="42" y2="44" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#5FE08C"/>
-      <stop offset="1" stop-color="#146C4A"/>
+    <linearGradient id="research-bg" x1="7" y1="5" x2="42" y2="44" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#6FE8A0"/>
+      <stop offset=".56" stop-color="#32B978"/>
+      <stop offset="1" stop-color="#0D764F"/>
     </linearGradient>
   </defs>
 </svg>

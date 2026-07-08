@@ -36,14 +36,26 @@ export type AgentApiStatus = {
 
 export type AgentApiConfig = {
   endpoint?: string;
+  baseUrl?: string;
   apiKey?: string;
 };
 
+const envBaseUrl = import.meta.env.VITE_AGENT_API_BASE_URL?.trim() || '';
 const envEndpoint = import.meta.env.VITE_AGENT_API_URL?.trim() || '';
 const envApiKey = import.meta.env.VITE_AGENT_API_KEY?.trim() || '';
 
+function joinApiUrl(baseUrl: string, path: string) {
+  const base = baseUrl.trim().replace(/\/+$/, '');
+  const nextPath = path.replace(/^\/+/, '');
+  return base ? `${base}/${nextPath}` : '';
+}
+
+function resolveEndpoint(config?: AgentApiConfig) {
+  return config?.endpoint?.trim() || envEndpoint || joinApiUrl(config?.baseUrl || envBaseUrl, 'agent/chat');
+}
+
 export function getAgentApiStatus(config?: AgentApiConfig): AgentApiStatus {
-  const endpoint = config?.endpoint?.trim() || envEndpoint;
+  const endpoint = resolveEndpoint(config);
   return {
     mode: endpoint ? 'api' : 'mock',
     endpoint,
@@ -59,11 +71,23 @@ function normalizeContent(payload: unknown): AgentApiResponse {
   }
 
   const data = payload as Record<string, unknown>;
+  const choices = Array.isArray(data.choices) ? (data.choices as Array<Record<string, unknown>>) : [];
+  const firstChoice = choices[0];
+  const choiceMessage =
+    firstChoice && typeof firstChoice.message === 'object' && firstChoice.message
+      ? (firstChoice.message as Record<string, unknown>)
+      : undefined;
+  const choiceDelta =
+    firstChoice && typeof firstChoice.delta === 'object' && firstChoice.delta
+      ? (firstChoice.delta as Record<string, unknown>)
+      : undefined;
   const content =
     data.content ??
     data.answer ??
     data.output ??
     data.text ??
+    choiceMessage?.content ??
+    choiceDelta?.content ??
     (typeof data.message === 'object' && data.message ? (data.message as Record<string, unknown>).content : undefined);
 
   return {
@@ -79,12 +103,21 @@ export async function sendAgentMessage(
   signal?: AbortSignal,
   config?: AgentApiConfig,
 ): Promise<AgentApiResponse> {
-  const endpoint = config?.endpoint?.trim() || envEndpoint;
+  const endpoint = resolveEndpoint(config);
   const apiKey = config?.apiKey?.trim() || envApiKey;
 
   if (!endpoint) {
     throw new Error('Agent API URL is not configured');
   }
+
+  const isChatCompletions = /\/chat\/completions\/?$/i.test(new URL(endpoint, window.location.origin).pathname);
+  const body = isChatCompletions
+    ? {
+        model: request.model,
+        messages: request.messages.map((message) => ({ role: message.role, content: message.content })),
+        temperature: request.temperature,
+      }
+    : request;
 
   const response = await fetch(endpoint, {
     method: 'POST',
@@ -92,7 +125,7 @@ export async function sendAgentMessage(
       'Content-Type': 'application/json',
       ...(apiKey ? { Authorization: `Bearer ${apiKey}` } : {}),
     },
-    body: JSON.stringify(request),
+    body: JSON.stringify(body),
     signal,
   });
 

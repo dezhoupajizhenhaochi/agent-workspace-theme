@@ -8,6 +8,8 @@ import {
   ChatInput,
   ChatInputAction,
   Citation,
+  Dropdown,
+  DropdownItem,
   Empty,
   Input,
   Markdown,
@@ -43,6 +45,7 @@ import {
   IconKey,
   IconLike,
   IconList,
+  IconLogOut,
   IconMessage,
   IconMessageCirclePlus,
   IconMicrophone,
@@ -52,6 +55,7 @@ import {
   IconRobot,
   IconSearch,
   IconSettings,
+  IconHelp,
   IconShare,
   IconSkill,
   IconSun,
@@ -70,16 +74,16 @@ import gallery09 from './assets/gallery/gallery-09.jpg';
 import gallery10 from './assets/gallery/gallery-10.jpg';
 import gallery11 from './assets/gallery/gallery-11.jpg';
 import gallery12 from './assets/gallery/gallery-12.jpg';
-import animateLogo from './assets/capability-logos/animate.svg';
-import browserMcpLogo from './assets/capability-logos/browser-mcp.svg';
-import dataAgentLogo from './assets/capability-logos/data-agent.svg';
-import designAuditLogo from './assets/capability-logos/design-audit.svg';
-import docWriterLogo from './assets/capability-logos/doc-writer.svg';
-import playwrightRunnerLogo from './assets/capability-logos/playwright-runner.svg';
-import presentationLogo from './assets/capability-logos/presentation.svg';
-import researchLogo from './assets/capability-logos/research.svg';
-import reviewAgentLogo from './assets/capability-logos/review-agent.svg';
-import workspaceFilesLogo from './assets/capability-logos/workspace-files.svg';
+import animateLogo from './assets/capability-logos/animate.png';
+import browserMcpLogo from './assets/capability-logos/browser-mcp.png';
+import dataAgentLogo from './assets/capability-logos/data-agent.png';
+import designAuditLogo from './assets/capability-logos/design-audit.png';
+import docWriterLogo from './assets/capability-logos/doc-writer.png';
+import playwrightRunnerLogo from './assets/capability-logos/playwright-runner.png';
+import presentationLogo from './assets/capability-logos/presentation.png';
+import researchLogo from './assets/capability-logos/research.png';
+import reviewAgentLogo from './assets/capability-logos/review-agent.png';
+import workspaceFilesLogo from './assets/capability-logos/workspace-files.png';
 import vedesignLogo from './assets/vedesign-logo.svg';
 import { agentApiStatus, getAgentApiStatus, sendAgentMessage } from './agentApi';
 import type { AgentApiStatus } from './agentApi';
@@ -104,6 +108,7 @@ type Conversation = {
   title: string;
   updatedAt: string;
   messages: AgentMessage[];
+  archived?: boolean;
 };
 
 type CapabilityItem = {
@@ -378,9 +383,7 @@ const navItems: Array<{ page: NavPage; label: string; icon: IconComponent }> = [
   { page: 'welcome', label: '新对话', icon: IconHome },
   { page: 'search', label: '搜索', icon: IconSearch },
   { page: 'skills', label: '发现', icon: IconSkill },
-  { page: 'mcp', label: 'MCP 管理', icon: IconDatabase },
   { page: 'files', label: '文件库', icon: IconFolder },
-  { page: 'settings', label: '设置', icon: IconSettings },
 ];
 
 const promptChips = [
@@ -720,6 +723,64 @@ const connectorRecommendations: ConnectorItem[] = [
   { id: 'baidu', name: '百度网盘', description: '连接团队素材库与历史交付文件。', icon: IconGlobe },
 ];
 
+type AccountPopoverAction = 'settings' | 'balance' | 'help' | 'logout';
+
+function AccountPopoverCard({
+  userName,
+  email,
+  workspaceName,
+  onSelect,
+}: {
+  userName: string;
+  email: string;
+  workspaceName: string;
+  onSelect: (action: AccountPopoverAction) => void;
+}) {
+  const actions: Array<{ key: AccountPopoverAction; label: string; icon: IconComponent; danger?: boolean }> = [
+    { key: 'settings', label: '设置', icon: IconSettings },
+    { key: 'balance', label: '剩余额度', icon: IconDatabase },
+    { key: 'help', label: '帮助与反馈', icon: IconHelp },
+    { key: 'logout', label: '退出登录', icon: IconLogOut },
+  ];
+
+  return (
+    <div className="account-popover-card" role="menu" aria-label="账户菜单">
+      <div className="account-popover-profile">
+        <Avatar className="account-popover-avatar" size={34}>
+          <IconUser size={18} />
+        </Avatar>
+        <div className="account-popover-profile-text">
+          <strong>{userName}</strong>
+          <span>{email}</span>
+        </div>
+      </div>
+      <div className="account-popover-actions">
+        {actions.map((action) => {
+          const Icon = action.icon;
+          return (
+            <button
+              key={action.key}
+              className={action.danger ? 'account-popover-item danger' : 'account-popover-item'}
+              type="button"
+              role="menuitem"
+              onClick={() => onSelect(action.key)}
+            >
+              <Icon size={18} />
+              <span>{action.label}</span>
+            </button>
+          );
+        })}
+      </div>
+      <button className="account-popover-workspace" type="button" onClick={() => onSelect('settings')}>
+        <Avatar className="account-popover-avatar" size={28}>
+          <IconUser size={15} />
+        </Avatar>
+        <span>{workspaceName}</span>
+      </button>
+    </div>
+  );
+}
+
 function AppSidebar({
   page,
   collapsed,
@@ -727,6 +788,8 @@ function AppSidebar({
   activeConversationId,
   onPageChange,
   onConversationOpen,
+  onConversationArchive,
+  onConversationDelete,
   onCollapsedChange,
 }: {
   page: Page;
@@ -735,24 +798,76 @@ function AppSidebar({
   activeConversationId: string | null;
   onPageChange: (page: NavPage) => void;
   onConversationOpen: (id: string) => void;
+  onConversationArchive: (id: string) => void;
+  onConversationDelete: (id: string) => void;
   onCollapsedChange: (collapsed: boolean) => void;
 }) {
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+  const accountRef = useRef<HTMLDivElement | null>(null);
+  const visibleConversations = conversations.filter((item) => !item.archived);
+
+  useEffect(() => {
+    if (!accountMenuOpen) return undefined;
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (!accountRef.current?.contains(event.target as Node)) {
+        setAccountMenuOpen(false);
+      }
+    };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setAccountMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('pointerdown', handlePointerDown);
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [accountMenuOpen]);
+
+  const selectAccountAction = (action: AccountPopoverAction) => {
+    setAccountMenuOpen(false);
+    if (action === 'settings') {
+      onPageChange('settings');
+    }
+  };
+
   return (
     <Sidebar
       className="agent-sidebar"
-      brand="Agent Workspace"
+      brand="Agent"
       collapsed={collapsed}
       expandTooltip="展开导航"
       logo={<img className="brand-icon" src={vedesignLogo} alt="" />}
       withFooter
       onToggle={(event) => onCollapsedChange(event.detail.collapsed)}
       footer={
-        <button className="user-entry" type="button" onClick={() => onPageChange('settings')}>
-          <Avatar size={28}>
-            <IconUser size={16} />
-          </Avatar>
-          <span>产品协作空间</span>
-        </button>
+        <div className="account-menu-anchor" ref={accountRef}>
+          {accountMenuOpen ? (
+            <AccountPopoverCard
+              userName="用户名称"
+              email="123456@bytedance.com"
+              workspaceName="Jessica"
+              onSelect={selectAccountAction}
+            />
+          ) : null}
+          <button
+            className="user-entry"
+            type="button"
+            aria-label="打开账户菜单"
+            aria-expanded={accountMenuOpen}
+            onClick={() => setAccountMenuOpen((open) => !open)}
+          >
+            <Avatar className="user-entry-avatar" size={28}>
+              <IconUser size={16} />
+            </Avatar>
+            <span className="user-entry-label">Jessica</span>
+          </button>
+        </div>
       }
     >
       <SidebarGroup withLabel={false}>
@@ -775,14 +890,40 @@ function AppSidebar({
         <SidebarItem prefix={<IconRobot size={20} />}>通用 Agent 控制台</SidebarItem>
       </SidebarGroup>
       <SidebarGroup label="历史会话">
-        {conversations.map((item, index) => (
+        {visibleConversations.map((item, index) => (
           <SidebarItem
             key={item.id}
+            active={item.id === activeConversationId}
+            selected={item.id === activeConversationId}
             type="history"
             unread={index === 0 && item.id !== activeConversationId}
             onClick={() => onConversationOpen(item.id)}
           >
-            {item.title}
+            <span className="history-row">
+              <span className="history-title">{item.title}</span>
+              <Dropdown
+                className="history-more-dropdown"
+                trigger="click"
+                position="right-start"
+                triggerNode={
+                  <button
+                    className="history-more-button"
+                    type="button"
+                    aria-label={`${item.title} 更多操作`}
+                    onClick={(event) => event.stopPropagation()}
+                  >
+                    <IconMoreHorizontal size={16} />
+                  </button>
+                }
+              >
+                <DropdownItem value="archive" onSelect={() => onConversationArchive(item.id)}>
+                  <span className="account-menu-item"><IconFolder size={16} />归档</span>
+                </DropdownItem>
+                <DropdownItem value="delete" onSelect={() => onConversationDelete(item.id)}>
+                  <span className="account-menu-item danger"><IconClose size={16} />删除</span>
+                </DropdownItem>
+              </Dropdown>
+            </span>
           </SidebarItem>
         ))}
       </SidebarGroup>
@@ -1213,9 +1354,15 @@ function ChatPage({
                         icon: <IconMoreHorizontal className="action-icon" />,
                         menu: (
                           <div className="workspace-action-menu">
-                            <button type="button">收藏回复</button>
-                            <button type="button">导出 Markdown</button>
-                            <button type="button">反馈问题</button>
+                            <DropdownItem value="favorite" onSelect={() => onFeedback('like')}>
+                              收藏回复
+                            </DropdownItem>
+                            <DropdownItem value="export" onSelect={onCopy}>
+                              导出 Markdown
+                            </DropdownItem>
+                            <DropdownItem value="feedback" onSelect={() => onFeedback('dislike')}>
+                              反馈问题
+                            </DropdownItem>
                           </div>
                         ),
                       },
@@ -1667,7 +1814,20 @@ function SettingsPage({
   onSave: () => void;
   onReset: () => void;
 }) {
+  const [activeSettingsSection, setActiveSettingsSection] = useState('general');
   const primaryPalette = buildPrimaryPalette(settings.themeConfig);
+  const settingSections = [
+    { key: 'general', label: '常规' },
+    { key: 'notifications', label: '通知' },
+    { key: 'personalization', label: '个性化' },
+    { key: 'app', label: '应用' },
+    { key: 'schedule', label: '安排' },
+    { key: 'billing', label: '账单' },
+    { key: 'family', label: '家长控制' },
+    { key: 'account', label: '账户' },
+  ];
+  const activeSectionLabel =
+    settingSections.find((section) => section.key === activeSettingsSection)?.label || '常规';
   const updateThemeConfig = (patch: Partial<ThemeConfig>) => {
     const next = { ...settings.themeConfig, ...patch };
     const shouldSyncHex =
@@ -1690,148 +1850,204 @@ function SettingsPage({
 
   return (
     <section className="main-panel feature-panel">
-      <div className="feature-container settings-container">
-        <AppHeader
-          title="设置"
-          action={
-            <>
-              <Button type="secondary" onClick={onReset}>重置</Button>
-              <Button type="primary" onClick={onSave}>保存设置</Button>
-            </>
-          }
-        />
-        <div className="settings-status">
-          {error ? <Tag status="error">{error}</Tag> : saved ? <Tag status="success">已保存</Tag> : <Tag>有未保存修改</Tag>}
-        </div>
-        <div className="settings-list">
-          <div className="setting-row">
-            <span>
-              <strong>Agent API</strong>
-              <small>{apiStatus.configured ? apiStatus.endpoint : '未配置接口地址，当前使用本地 mock 兜底'}</small>
-            </span>
-            <Tag status={apiStatus.configured ? 'success' : 'warning'}>
-              {apiStatus.configured ? '正式接口' : 'Mock 模式'}
-            </Tag>
+      <div className="settings-layout">
+        <header className="settings-topbar">
+          <div>
+            <h2>设置</h2>
           </div>
-          <label className="setting-row api-setting-row">
-            <span>
-              <strong>API Base URL</strong>
-              <small>服务根路径，用于后续补齐会话、文件库和能力管理接口</small>
-            </span>
-            <Input
-              className="api-setting-input"
-              placeholder="https://your-agent-service.example.com/api"
-              value={settings.apiBaseUrl}
-              onInput={(event) => onPatch({ apiBaseUrl: event.currentTarget.value })}
-            />
-          </label>
-          <label className="setting-row api-setting-row">
-            <span>
-              <strong>Chat API URL</strong>
-              <small>发送消息时调用的正式对话接口，支持 http(s) 或 /api 相对路径</small>
-            </span>
-            <Input
-              className="api-setting-input"
-              placeholder="https://your-agent-service.example.com/api/agent/chat"
-              status={error.includes('Chat API') ? 'error' : undefined}
-              value={settings.apiChatUrl}
-              onInput={(event) => onPatch({ apiChatUrl: event.currentTarget.value })}
-            />
-          </label>
-          <label className="setting-row api-setting-row">
-            <span>
-              <strong>Stream API URL</strong>
-              <small>预留给 SSE/流式输出，对齐 /api/agent/chat/stream</small>
-            </span>
-            <Input
-              className="api-setting-input"
-              placeholder="https://your-agent-service.example.com/api/agent/chat/stream"
-              status={error.includes('Stream API') ? 'error' : undefined}
-              value={settings.apiStreamUrl}
-              onInput={(event) => onPatch({ apiStreamUrl: event.currentTarget.value })}
-            />
-          </label>
-          <label className="setting-row api-setting-row">
-            <span>
-              <strong>API Key</strong>
-              <small>可选，调用时会作为 Bearer Token 写入 Authorization</small>
-            </span>
-            <Input
-              className="api-setting-input"
-              type="password"
-              placeholder="sk-..."
-              value={settings.apiKey}
-              onInput={(event) => onPatch({ apiKey: event.currentTarget.value })}
-            />
-          </label>
-          <div className="setting-row">
-            <span>
-              <strong>优先流式输出</strong>
-              <small>开启后优先使用 Stream API；当前未配置时仍走普通 Chat API</small>
-            </span>
-            <Switch checked={settings.preferStreaming} onChange={(event) => onPatch({ preferStreaming: event.detail.checked })} />
+          <div className="settings-topbar-actions">
+            {error ? <Tag status="error">{error}</Tag> : saved ? <Tag status="success">已保存</Tag> : <Tag>有未保存修改</Tag>}
+            <Button type="secondary" onClick={onReset}>重置</Button>
+            <Button type="primary" onClick={onSave}>保存设置</Button>
           </div>
-          <label className="setting-row">
-            <span>
-              <strong>默认模型</strong>
-              <small>用于新建对话和模板任务</small>
-            </span>
-            <Input value={settings.model} onInput={(event) => onPatch({ model: event.currentTarget.value })} />
-          </label>
-          <label className="setting-row">
-            <span>
-              <strong>生成温度</strong>
-              <small>范围 0 到 2，越高越发散</small>
-            </span>
-            <Input
-              value={settings.temperature}
-              status={error ? 'error' : undefined}
-              onInput={(event) => onPatch({ temperature: event.currentTarget.value })}
-            />
-          </label>
-          <div className="setting-row">
-            <span>
-              <strong>工作区记忆</strong>
-              <small>跨会话复用偏好、术语和上下文</small>
-            </span>
-            <Switch checked={settings.memory} onChange={(event) => onPatch({ memory: event.detail.checked })} />
-          </div>
-          <div className="setting-row">
-            <span>
-              <strong>高风险操作确认</strong>
-              <small>安装能力、调用外部服务或写入文件前请求确认</small>
-            </span>
-            <Switch checked={settings.approval} onChange={(event) => onPatch({ approval: event.detail.checked })} />
-          </div>
-          <div className="setting-row">
-            <span>
-              <strong>通知提醒</strong>
-              <small>任务完成、失败或需要人工确认时提醒</small>
-            </span>
-            <Switch checked={settings.notifications} onChange={(event) => onPatch({ notifications: event.detail.checked })} />
-          </div>
-          <div className="setting-row">
-            <span>
-              <strong>外观</strong>
-              <small>切换亮色或暗色语义模式</small>
-            </span>
-            <div className="segmented">
-              <button className={settings.theme === 'light' ? 'active' : ''} type="button" onClick={() => onPatch({ theme: 'light' })}>
-                <IconSun size={14} />
-                亮色
+        </header>
+        <div className="settings-workspace">
+          <nav className="settings-nav" aria-label="设置分类">
+            {settingSections.map((section) => (
+              <button
+                key={section.key}
+                className={activeSettingsSection === section.key ? 'active' : ''}
+                type="button"
+                onClick={() => setActiveSettingsSection(section.key)}
+              >
+                {section.label}
               </button>
-              <button className={settings.theme === 'dark' ? 'active' : ''} type="button" onClick={() => onPatch({ theme: 'dark' })}>
-                <IconBell size={14} />
-                暗色
-              </button>
-            </div>
-          </div>
-          <div className="setting-row theme-config-row">
-            <div>
-              <strong>主题配置</strong>
-              <small>参考 Vedesign Themes 的 OKLCH 主色生成能力，调整后实时应用到当前 Agent。</small>
-            </div>
-            <div className="theme-config-panel">
+            ))}
+          </nav>
+          <div className="settings-content">
+            {activeSettingsSection === 'general' ? (
+              <>
+                <section className="settings-block">
+                  <h3>基础设置</h3>
+                  <div className="settings-card">
+                    <div className="settings-card-row">
+                      <span>
+                        <strong>主题</strong>
+                        <small>选择当前 Agent 工作区的亮暗模式</small>
+                      </span>
+                      <div className="settings-theme-toggle">
+                        <button className={settings.theme === 'light' ? 'active' : ''} type="button" onClick={() => onPatch({ theme: 'light' })}>
+                          <IconSun size={15} />
+                        </button>
+                        <button className={settings.theme === 'dark' ? 'active' : ''} type="button" onClick={() => onPatch({ theme: 'dark' })}>
+                          <IconBell size={15} />
+                        </button>
+                      </div>
+                    </div>
+                    <div className="settings-card-row">
+                      <span>
+                        <strong>语言</strong>
+                        <small>选择界面按钮、标签和应用内文本语言</small>
+                      </span>
+                      <Button type="text">简体中文</Button>
+                    </div>
+                    <label className="settings-card-row">
+                      <span>
+                        <strong>默认模型</strong>
+                        <small>用于新建对话和模板任务</small>
+                      </span>
+                      <Input value={settings.model} onInput={(event) => onPatch({ model: event.currentTarget.value })} />
+                    </label>
+                    <label className="settings-card-row">
+                      <span>
+                        <strong>生成温度</strong>
+                        <small>范围 0 到 2，越高越发散</small>
+                      </span>
+                      <Input
+                        value={settings.temperature}
+                        status={error ? 'error' : undefined}
+                        onInput={(event) => onPatch({ temperature: event.currentTarget.value })}
+                      />
+                    </label>
+                  </div>
+                </section>
+                <section className="settings-block">
+                  <h3>常规</h3>
+                  <div className="settings-card">
+                    <div className="settings-card-row">
+                      <span>
+                        <strong>工作区记忆</strong>
+                        <small>跨会话复用偏好、术语和上下文</small>
+                      </span>
+                      <Switch checked={settings.memory} onChange={(event) => onPatch({ memory: event.detail.checked })} />
+                    </div>
+                    <div className="settings-card-row">
+                      <span>
+                        <strong>高风险操作确认</strong>
+                        <small>安装能力、调用外部服务或写入文件前请求确认</small>
+                      </span>
+                      <Switch checked={settings.approval} onChange={(event) => onPatch({ approval: event.detail.checked })} />
+                    </div>
+                    <div className="settings-card-row">
+                      <span>
+                        <strong>优先流式输出</strong>
+                        <small>开启后优先使用 Stream API；未配置时仍走普通 Chat API</small>
+                      </span>
+                      <Switch checked={settings.preferStreaming} onChange={(event) => onPatch({ preferStreaming: event.detail.checked })} />
+                    </div>
+                  </div>
+                </section>
+              </>
+            ) : null}
+
+            {activeSettingsSection === 'notifications' ? (
+              <section className="settings-block">
+                <h3>通知</h3>
+                <div className="settings-card">
+                  <div className="settings-card-row">
+                    <span>
+                      <strong>通知提醒</strong>
+                      <small>任务完成、失败或需要人工确认时提醒</small>
+                    </span>
+                    <Switch checked={settings.notifications} onChange={(event) => onPatch({ notifications: event.detail.checked })} />
+                  </div>
+                  <div className="settings-card-row">
+                    <span>
+                      <strong>运行时防止系统休眠</strong>
+                      <small>运行对话和自动化任务时保持唤醒状态</small>
+                    </span>
+                    <Switch checked={settings.notifications} onChange={(event) => onPatch({ notifications: event.detail.checked })} />
+                  </div>
+                </div>
+              </section>
+            ) : null}
+
+            {activeSettingsSection === 'app' ? (
+              <section className="settings-block">
+                <h3>应用</h3>
+                <div className="settings-card">
+                  <div className="settings-card-row">
+                    <span>
+                      <strong>Agent API</strong>
+                      <small>{apiStatus.configured ? apiStatus.endpoint : '未配置接口地址，当前使用本地 mock 兜底'}</small>
+                    </span>
+                    <Tag status={apiStatus.configured ? 'success' : 'warning'}>
+                      {apiStatus.configured ? '正式接口' : 'Mock 模式'}
+                    </Tag>
+                  </div>
+                  <label className="settings-card-row wide-control">
+                    <span>
+                      <strong>API Base URL</strong>
+                      <small>服务根路径，用于后续补齐会话、文件库和能力管理接口</small>
+                    </span>
+                    <Input
+                      placeholder="https://your-agent-service.example.com/api"
+                      value={settings.apiBaseUrl}
+                      onInput={(event) => onPatch({ apiBaseUrl: event.currentTarget.value })}
+                    />
+                  </label>
+                  <label className="settings-card-row wide-control">
+                    <span>
+                      <strong>Chat API URL</strong>
+                      <small>发送消息时调用的正式对话接口，支持 http(s) 或 /api 相对路径</small>
+                    </span>
+                    <Input
+                      placeholder="https://your-agent-service.example.com/api/agent/chat"
+                      status={error.includes('Chat API') ? 'error' : undefined}
+                      value={settings.apiChatUrl}
+                      onInput={(event) => onPatch({ apiChatUrl: event.currentTarget.value })}
+                    />
+                  </label>
+                  <label className="settings-card-row wide-control">
+                    <span>
+                      <strong>Stream API URL</strong>
+                      <small>预留给 SSE/流式输出，对齐 /api/agent/chat/stream</small>
+                    </span>
+                    <Input
+                      placeholder="https://your-agent-service.example.com/api/agent/chat/stream"
+                      status={error.includes('Stream API') ? 'error' : undefined}
+                      value={settings.apiStreamUrl}
+                      onInput={(event) => onPatch({ apiStreamUrl: event.currentTarget.value })}
+                    />
+                  </label>
+                  <label className="settings-card-row wide-control">
+                    <span>
+                      <strong>API Key</strong>
+                      <small>可选，调用时会作为 Bearer Token 写入 Authorization</small>
+                    </span>
+                    <Input
+                      type="password"
+                      placeholder="sk-..."
+                      value={settings.apiKey}
+                      onInput={(event) => onPatch({ apiKey: event.currentTarget.value })}
+                    />
+                  </label>
+                </div>
+              </section>
+            ) : null}
+
+            {activeSettingsSection === 'personalization' ? (
+              <section className="settings-block">
+                <h3>个性化</h3>
+                <div className="settings-card theme-config-card">
+                  <div className="settings-card-row">
+                    <span>
+                      <strong>主题配置</strong>
+                      <small>参考 Vedesign Themes 的 OKLCH 主色生成能力，调整后实时应用到当前 Agent。</small>
+                    </span>
+                    <Tag>{formatOklch(themeConfigToOklch(settings.themeConfig))}</Tag>
+                  </div>
+                  <div className="theme-config-panel">
               <div className="theme-anchor-row">
                 <label className="theme-color-chip" style={{ background: formatOklch(themeConfigToOklch(settings.themeConfig)) }}>
                   <input
@@ -1931,6 +2147,18 @@ function SettingsPage({
                 ))}
               </div>
             </div>
+                </div>
+              </section>
+            ) : null}
+
+            {!['general', 'notifications', 'personalization', 'app'].includes(activeSettingsSection) ? (
+              <section className="settings-block">
+                <h3>{activeSectionLabel}</h3>
+                <div className="settings-card settings-placeholder-card">
+                  <Empty title={`${activeSectionLabel}设置`} description="此分类已预留，可在接入真实业务后继续补充配置项。" />
+                </div>
+              </section>
+            ) : null}
           </div>
         </div>
       </div>
@@ -1979,9 +2207,17 @@ function writeStorage<T>(key: string, value: T) {
 }
 
 function hydrateSettings(settings: Partial<AgentSettings>): AgentSettings {
-  return {
+  const merged = {
     ...defaultSettings,
     ...settings,
+  };
+
+  return {
+    ...merged,
+    apiBaseUrl: settings.apiBaseUrl?.trim() ? settings.apiBaseUrl : defaultSettings.apiBaseUrl,
+    apiChatUrl: settings.apiChatUrl?.trim() ? settings.apiChatUrl : defaultSettings.apiChatUrl,
+    apiStreamUrl: settings.apiStreamUrl?.trim() ? settings.apiStreamUrl : defaultSettings.apiStreamUrl,
+    apiKey: settings.apiKey?.trim() ? settings.apiKey : defaultSettings.apiKey,
     themeConfig: {
       ...defaultThemeConfig,
       ...(settings.themeConfig || {}),
@@ -2179,7 +2415,7 @@ export function App() {
   };
 
   const openConversation = (id: string) => {
-    const conversation = conversations.find((item) => item.id === id);
+    const conversation = conversations.find((item) => item.id === id && !item.archived);
     if (!conversation) return;
     setActiveConversationId(id);
     setMessages(conversation.messages);
@@ -2188,6 +2424,25 @@ export function App() {
     setStatus('complete');
     setSearchOpen(false);
     setPage('chat');
+  };
+
+  const clearActiveConversation = (id: string) => {
+    if (activeConversationId !== id) return;
+    setActiveConversationId(null);
+    setMessages([]);
+    setStatus('idle');
+    setArtifactOpen(false);
+    setPage('welcome');
+  };
+
+  const archiveConversation = (id: string) => {
+    setConversations((current) => current.map((item) => (item.id === id ? { ...item, archived: true } : item)));
+    clearActiveConversation(id);
+  };
+
+  const deleteConversation = (id: string) => {
+    setConversations((current) => current.filter((item) => item.id !== id));
+    clearActiveConversation(id);
   };
 
   const upsertConversation = (conversationId: string, title: string, nextMessages: AgentMessage[]) => {
@@ -2256,7 +2511,11 @@ export function App() {
     if (!prompt.trim()) return;
     if (timerRef.current) window.clearTimeout(timerRef.current);
     abortRef.current?.abort();
-    const currentApiStatus = getAgentApiStatus({ endpoint: settings.apiChatUrl, apiKey: settings.apiKey });
+    const currentApiStatus = getAgentApiStatus({
+      endpoint: settings.apiChatUrl,
+      baseUrl: settings.apiBaseUrl,
+      apiKey: settings.apiKey,
+    });
 
     const now = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
     const conversationId = activeConversationId || createId('conversation');
@@ -2320,6 +2579,7 @@ export function App() {
         controller.signal,
         {
           endpoint: settings.apiChatUrl,
+          baseUrl: settings.apiBaseUrl,
           apiKey: settings.apiKey,
         },
       );
@@ -2327,17 +2587,11 @@ export function App() {
     } catch (error) {
       if (controller.signal.aborted) return;
       const detail = error instanceof Error ? error.message : String(error);
-      setMessages((current) =>
-        current.map((message) =>
-          message.id === assistantId
-            ? {
-                ...message,
-                content: `正式 Agent API 调用失败：${detail}\n\n我会先切到本地兜底结果，方便你继续验证界面流程。`,
-              }
-            : message,
-        ),
+      finishAssistantMessage(
+        assistantId,
+        `正式 Agent API 调用失败：${detail}\n\n请检查 Chat API URL、API Key、模型名、CORS 或返回协议后重试。`,
+        conversationId,
       );
-      runMockGeneration(prompt, assistantId, conversationId, true);
     } finally {
       if (abortRef.current === controller) abortRef.current = null;
     }
@@ -2583,7 +2837,11 @@ export function App() {
         settings={settings}
         saved={settingsSaved}
         error={settingsError}
-        apiStatus={getAgentApiStatus({ endpoint: settings.apiChatUrl, apiKey: settings.apiKey })}
+        apiStatus={getAgentApiStatus({
+          endpoint: settings.apiChatUrl,
+          baseUrl: settings.apiBaseUrl,
+          apiKey: settings.apiKey,
+        })}
         onPatch={patchSettings}
         onSave={saveSettings}
         onReset={() => {
@@ -2628,6 +2886,8 @@ export function App() {
         activeConversationId={activeConversationId}
         onPageChange={handleNavChange}
         onConversationOpen={openConversation}
+        onConversationArchive={archiveConversation}
+        onConversationDelete={deleteConversation}
         onCollapsedChange={setSidebarCollapsed}
       />
       <main className="app-main">{content}</main>
