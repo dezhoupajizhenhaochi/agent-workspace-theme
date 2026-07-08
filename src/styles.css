@@ -100,6 +100,10 @@ button {
   color: var(--color-text-primary);
 }
 
+.dark .brand-icon {
+  filter: invert(1);
+}
+
 .user-entry {
   display: flex;
   width: 100%;
@@ -129,6 +133,14 @@ button {
   min-width: 0;
   height: 100vh;
   padding: 8px 8px 8px 0;
+}
+
+.file-input-hidden {
+  position: fixed;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .main-panel {
@@ -212,14 +224,46 @@ button {
   text-align: center;
 }
 
-.agent-composer {
+.composer-shell {
+  position: relative;
   width: min(800px, 100%);
+  border-radius: 22px;
+  padding: 1.5px;
+  overflow: visible;
+}
+
+.composer-shell.compact {
+  width: min(800px, 100%);
+}
+
+.composer-shell.shimmer-unavailable {
+  background: linear-gradient(
+    90deg,
+    var(--color-yellow-300),
+    var(--color-moss-400),
+    var(--color-green-400)
+  );
+}
+
+.agent-composer {
+  position: relative;
+  width: 100%;
   min-height: 138px;
   --ve-chat-input-radius: 20px;
+  --ve-chat-input-placeholder-color: var(--color-text-tertiary);
+  --ve-chat-input-text-color: var(--color-text-primary);
 }
 
 .agent-composer.compact {
   min-height: 116px;
+}
+
+.agent-composer::part(textarea) {
+  color: var(--color-text-primary);
+}
+
+.agent-composer::part(textarea)::placeholder {
+  color: var(--color-text-tertiary);
 }
 
 .prompt-chip-row {
@@ -301,8 +345,8 @@ button {
   z-index: 40;
   inset: 0;
   display: grid;
-  place-items: start center;
-  padding-top: min(14vh, 112px);
+  place-items: center;
+  padding: 24px;
 }
 
 .search-backdrop {
@@ -318,6 +362,7 @@ button {
   z-index: 1;
   display: grid;
   width: min(720px, calc(100% - 48px));
+  max-height: min(720px, calc(100vh - 48px));
   gap: 10px;
   border: 0.5px solid var(--color-border-default);
   border-radius: 18px;
@@ -564,6 +609,56 @@ button {
   font-size: 13px;
 }
 
+.workspace-actions {
+  width: fit-content;
+  --ve-actions-gap: 6px;
+  --ve-actions-btn-size: 30px;
+  --ve-actions-icon-size: 16px;
+  --ve-actions-icon-color: var(--color-text-tertiary);
+}
+
+.workspace-actions::part(root) {
+  min-height: 34px;
+}
+
+.workspace-actions::part(item),
+.workspace-actions::part(more) {
+  color: var(--color-text-tertiary);
+}
+
+.action-icon.active {
+  color: var(--color-primary-600);
+}
+
+.workspace-actions-state {
+  min-width: 44px;
+  color: var(--color-text-tertiary);
+  font-size: 12px;
+  line-height: 20px;
+}
+
+.workspace-action-menu {
+  display: grid;
+  min-width: 148px;
+  gap: 2px;
+  padding: 6px;
+}
+
+.workspace-action-menu button {
+  min-height: 32px;
+  border: 0;
+  border-radius: 8px;
+  padding: 6px 10px;
+  background: transparent;
+  color: var(--color-text-secondary);
+  text-align: left;
+}
+
+.workspace-action-menu button:hover {
+  background: var(--color-bg-surface);
+  color: var(--color-text-primary);
+}
+
 .connector-card {
   display: grid;
   gap: 14px;
@@ -778,7 +873,26 @@ button {
   border-radius: 12px;
 }
 
+.capability-icon:has(.capability-logo-img) {
+  border-color: transparent;
+  background: transparent;
+}
+
+.capability-logo-img {
+  display: block;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
 .capability-icon.large {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+}
+
+.capability-icon.large .capability-logo-img {
   width: 48px;
   height: 48px;
   border-radius: 14px;
@@ -1013,7 +1127,7 @@ button {
 }
 
 .settings-container {
-  max-width: 820px;
+  max-width: 980px;
 }
 
 .settings-status {
@@ -1038,6 +1152,16 @@ button {
 
 .setting-row .segmented {
   justify-self: start;
+}
+
+.api-setting-row {
+  grid-template-columns: minmax(180px, 260px) minmax(0, 1fr);
+  gap: 24px;
+}
+
+.api-setting-input {
+  width: 100%;
+  min-width: 0;
 }
 
 .theme-config-row {

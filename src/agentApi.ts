@@ -10,6 +10,11 @@ export type AgentApiRequest = {
   model: string;
   temperature: number;
   messages: AgentApiMessage[];
+  context?: {
+    enabledSkills?: string[];
+    enabledMcpServers?: string[];
+    files?: Array<{ id: string; name: string; kind: string; size: string }>;
+  };
 };
 
 export type AgentApiResponse = {
@@ -29,14 +34,24 @@ export type AgentApiStatus = {
   configured: boolean;
 };
 
-const endpoint = import.meta.env.VITE_AGENT_API_URL?.trim() || '';
-const apiKey = import.meta.env.VITE_AGENT_API_KEY?.trim() || '';
-
-export const agentApiStatus: AgentApiStatus = {
-  mode: endpoint ? 'api' : 'mock',
-  endpoint,
-  configured: Boolean(endpoint),
+export type AgentApiConfig = {
+  endpoint?: string;
+  apiKey?: string;
 };
+
+const envEndpoint = import.meta.env.VITE_AGENT_API_URL?.trim() || '';
+const envApiKey = import.meta.env.VITE_AGENT_API_KEY?.trim() || '';
+
+export function getAgentApiStatus(config?: AgentApiConfig): AgentApiStatus {
+  const endpoint = config?.endpoint?.trim() || envEndpoint;
+  return {
+    mode: endpoint ? 'api' : 'mock',
+    endpoint,
+    configured: Boolean(endpoint),
+  };
+}
+
+export const agentApiStatus: AgentApiStatus = getAgentApiStatus();
 
 function normalizeContent(payload: unknown): AgentApiResponse {
   if (!payload || typeof payload !== 'object') {
@@ -59,9 +74,16 @@ function normalizeContent(payload: unknown): AgentApiResponse {
   };
 }
 
-export async function sendAgentMessage(request: AgentApiRequest, signal?: AbortSignal): Promise<AgentApiResponse> {
+export async function sendAgentMessage(
+  request: AgentApiRequest,
+  signal?: AbortSignal,
+  config?: AgentApiConfig,
+): Promise<AgentApiResponse> {
+  const endpoint = config?.endpoint?.trim() || envEndpoint;
+  const apiKey = config?.apiKey?.trim() || envApiKey;
+
   if (!endpoint) {
-    throw new Error('VITE_AGENT_API_URL is not configured');
+    throw new Error('Agent API URL is not configured');
   }
 
   const response = await fetch(endpoint, {

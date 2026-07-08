@@ -1,0 +1,596 @@
+openapi: 3.0.3
+info:
+  title: Generic Agent Workspace API
+  version: 1.0.0
+servers:
+  - url: https://your-agent-service.example.com/api
+security:
+  - bearerAuth: []
+paths:
+  /agent/chat:
+    post:
+      summary: Send a non-streaming agent message
+      operationId: sendAgentMessage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChatRequest"
+      responses:
+        "200":
+          description: Assistant response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatResponse"
+  /agent/chat/stream:
+    post:
+      summary: Send a streaming agent message through SSE
+      operationId: streamAgentMessage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChatRequest"
+      responses:
+        "200":
+          description: Server-sent event stream
+          content:
+            text/event-stream:
+              schema:
+                type: string
+  /conversations:
+    get:
+      summary: List conversations
+      operationId: listConversations
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: cursor
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Conversation list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConversationList"
+    post:
+      summary: Create a conversation
+      operationId: createConversation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+              properties:
+                title:
+                  type: string
+                model:
+                  type: string
+      responses:
+        "200":
+          description: Created conversation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Conversation"
+  /conversations/{conversationId}:
+    get:
+      summary: Get conversation detail
+      operationId: getConversation
+      parameters:
+        - $ref: "#/components/parameters/ConversationId"
+      responses:
+        "200":
+          description: Conversation detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Conversation"
+    patch:
+      summary: Update conversation title
+      operationId: updateConversation
+      parameters:
+        - $ref: "#/components/parameters/ConversationId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+      responses:
+        "200":
+          description: Updated conversation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Conversation"
+    delete:
+      summary: Delete conversation
+      operationId: deleteConversation
+      parameters:
+        - $ref: "#/components/parameters/ConversationId"
+      responses:
+        "204":
+          description: Deleted
+  /files:
+    get:
+      summary: List files
+      operationId: listFiles
+      parameters:
+        - name: query
+          in: query
+          schema:
+            type: string
+        - name: kind
+          in: query
+          schema:
+            type: string
+            enum: [image, document, code, video]
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: cursor
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: File list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/FileItem"
+                  nextCursor:
+                    type: string
+                    nullable: true
+    post:
+      summary: Upload a file
+      operationId: uploadFile
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+                conversationId:
+                  type: string
+      responses:
+        "200":
+          description: Uploaded file
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FileItem"
+  /files/{fileId}:
+    delete:
+      summary: Delete a file
+      operationId: deleteFile
+      parameters:
+        - name: fileId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+  /capabilities:
+    get:
+      summary: List skills, templates, and MCP capabilities
+      operationId: listCapabilities
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [skill, template, mcp]
+        - name: installed
+          in: query
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: Capability list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Capability"
+  /capabilities/{capabilityId}/install:
+    post:
+      summary: Install a capability
+      operationId: installCapability
+      parameters:
+        - name: capabilityId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                enabled:
+                  type: boolean
+      responses:
+        "200":
+          description: Installed capability
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Capability"
+  /capabilities/{capabilityId}:
+    patch:
+      summary: Update capability enabled state
+      operationId: updateCapability
+      parameters:
+        - name: capabilityId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                enabled:
+                  type: boolean
+      responses:
+        "200":
+          description: Updated capability
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Capability"
+  /mcp-servers:
+    get:
+      summary: List MCP servers
+      operationId: listMcpServers
+      responses:
+        "200":
+          description: MCP server list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/McpServer"
+  /mcp-servers/{serverId}:
+    patch:
+      summary: Update MCP server state
+      operationId: updateMcpServer
+      parameters:
+        - name: serverId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                enabled:
+                  type: boolean
+                trusted:
+                  type: boolean
+      responses:
+        "200":
+          description: Updated MCP server
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/McpServer"
+  /settings:
+    get:
+      summary: Get user settings
+      operationId: getSettings
+      responses:
+        "200":
+          description: Settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Settings"
+    put:
+      summary: Save user settings
+      operationId: saveSettings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Settings"
+      responses:
+        "200":
+          description: Saved settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Settings"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  parameters:
+    ConversationId:
+      name: conversationId
+      in: path
+      required: true
+      schema:
+        type: string
+  schemas:
+    ChatRequest:
+      type: object
+      required:
+        - input
+        - model
+        - temperature
+        - messages
+      properties:
+        input:
+          type: string
+        conversationId:
+          type: string
+        model:
+          type: string
+        temperature:
+          type: number
+        messages:
+          type: array
+          items:
+            $ref: "#/components/schemas/Message"
+        context:
+          $ref: "#/components/schemas/AgentContext"
+    ChatResponse:
+      type: object
+      required:
+        - content
+      properties:
+        conversationId:
+          type: string
+        message:
+          $ref: "#/components/schemas/Message"
+        content:
+          type: string
+        citations:
+          type: array
+          items:
+            $ref: "#/components/schemas/Citation"
+        artifact:
+          $ref: "#/components/schemas/Artifact"
+        usage:
+          $ref: "#/components/schemas/Usage"
+    AgentContext:
+      type: object
+      properties:
+        enabledSkills:
+          type: array
+          items:
+            type: string
+        enabledMcpServers:
+          type: array
+          items:
+            type: string
+        files:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              name:
+                type: string
+              kind:
+                type: string
+              size:
+                type: string
+    Message:
+      type: object
+      required:
+        - id
+        - role
+        - content
+      properties:
+        id:
+          type: string
+        role:
+          type: string
+          enum: [user, assistant]
+        content:
+          type: string
+        status:
+          type: string
+          enum: [complete, generating, cancelled]
+        createdAt:
+          type: string
+    Citation:
+      type: object
+      properties:
+        key:
+          type: string
+        title:
+          type: string
+        url:
+          type: string
+    Artifact:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        content:
+          type: string
+        mimeType:
+          type: string
+    Usage:
+      type: object
+      properties:
+        inputTokens:
+          type: integer
+        outputTokens:
+          type: integer
+        totalTokens:
+          type: integer
+    ConversationList:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ConversationSummary"
+        nextCursor:
+          type: string
+          nullable: true
+    ConversationSummary:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        updatedAt:
+          type: string
+        messageCount:
+          type: integer
+    Conversation:
+      allOf:
+        - $ref: "#/components/schemas/ConversationSummary"
+        - type: object
+          properties:
+            createdAt:
+              type: string
+            messages:
+              type: array
+              items:
+                $ref: "#/components/schemas/Message"
+    FileItem:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        kind:
+          type: string
+          enum: [image, document, code, video]
+        mimeType:
+          type: string
+        size:
+          type: string
+        status:
+          type: string
+          enum: [ready, uploading, error]
+        url:
+          type: string
+        createdAt:
+          type: string
+    Capability:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        type:
+          type: string
+          enum: [skill, template, mcp]
+        installed:
+          type: boolean
+        enabled:
+          type: boolean
+        tags:
+          type: array
+          items:
+            type: string
+    McpServer:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+        enabled:
+          type: boolean
+        trusted:
+          type: boolean
+        updatedAt:
+          type: string
+    Settings:
+      type: object
+      properties:
+        model:
+          type: string
+        temperature:
+          type: string
+        memory:
+          type: boolean
+        approval:
+          type: boolean
+        notifications:
+          type: boolean
+        theme:
+          type: string
+          enum: [light, dark]
+        themeConfig:
+          type: object
+          properties:
+            primaryHex:
+              type: string
+            lightness:
+              type: number
+            chroma:
+              type: number
+            hue:
+              type: number

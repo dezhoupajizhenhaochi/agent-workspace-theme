@@ -31,6 +31,7 @@ import {
   IconCode,
   IconCopy,
   IconDatabase,
+  IconDislike,
   IconDocument,
   IconDownload,
   IconFile,
@@ -40,6 +41,7 @@ import {
   IconGrid,
   IconHome,
   IconKey,
+  IconLike,
   IconList,
   IconMessage,
   IconMessageCirclePlus,
@@ -53,6 +55,8 @@ import {
   IconShare,
   IconSkill,
   IconSun,
+  IconThumbDownFilled,
+  IconThumbUpFilled,
   IconTypeCodeStateDefault,
   IconTypeImageStateDefault,
   IconTypeVideoStateDefault,
@@ -66,8 +70,19 @@ import gallery09 from './assets/gallery/gallery-09.jpg';
 import gallery10 from './assets/gallery/gallery-10.jpg';
 import gallery11 from './assets/gallery/gallery-11.jpg';
 import gallery12 from './assets/gallery/gallery-12.jpg';
+import animateLogo from './assets/capability-logos/animate.svg';
+import browserMcpLogo from './assets/capability-logos/browser-mcp.svg';
+import dataAgentLogo from './assets/capability-logos/data-agent.svg';
+import designAuditLogo from './assets/capability-logos/design-audit.svg';
+import docWriterLogo from './assets/capability-logos/doc-writer.svg';
+import playwrightRunnerLogo from './assets/capability-logos/playwright-runner.svg';
+import presentationLogo from './assets/capability-logos/presentation.svg';
+import researchLogo from './assets/capability-logos/research.svg';
+import reviewAgentLogo from './assets/capability-logos/review-agent.svg';
+import workspaceFilesLogo from './assets/capability-logos/workspace-files.svg';
 import vedesignLogo from './assets/vedesign-logo.svg';
-import { agentApiStatus, sendAgentMessage } from './agentApi';
+import { agentApiStatus, getAgentApiStatus, sendAgentMessage } from './agentApi';
+import type { AgentApiStatus } from './agentApi';
 
 type IconComponent = React.ComponentType<{ size?: number | string; className?: string }>;
 type Page = 'welcome' | 'chat' | 'skills' | 'mcp' | 'files' | 'settings';
@@ -84,6 +99,13 @@ type AgentMessage = {
   createdAt: string;
 };
 
+type Conversation = {
+  id: string;
+  title: string;
+  updatedAt: string;
+  messages: AgentMessage[];
+};
+
 type CapabilityItem = {
   id: string;
   name: string;
@@ -93,6 +115,7 @@ type CapabilityItem = {
   enabled: boolean;
   tags: string[];
   icon: IconComponent;
+  logo?: string;
 };
 
 type FileItem = {
@@ -103,6 +126,7 @@ type FileItem = {
   size: string;
   status: 'ready' | 'uploading' | 'error';
   icon: IconComponent;
+  mimeType?: string;
 };
 
 type McpServer = {
@@ -126,6 +150,11 @@ type ConnectorItem = {
 type AgentSettings = {
   model: string;
   temperature: string;
+  apiBaseUrl: string;
+  apiChatUrl: string;
+  apiStreamUrl: string;
+  apiKey: string;
+  preferStreaming: boolean;
   memory: boolean;
   approval: boolean;
   notifications: boolean;
@@ -145,6 +174,39 @@ type OklchColor = {
   C: number;
   H: number;
 };
+
+type ShimmerStop = {
+  offset: string;
+  color: string;
+};
+
+type ShimmerController = {
+  play: () => void;
+  stop: () => void;
+  destroy: () => void;
+  setGradient?: (stops: ShimmerStop[]) => void;
+};
+
+declare global {
+  interface Window {
+    initShimmerBorder?: (
+      host: Element | string,
+      options?: {
+        radius?: number;
+        strokeWidth?: number;
+        colorRatio?: number;
+        duration?: number;
+        loops?: number;
+        gradient?: ShimmerStop[];
+        trigger?: 'mount' | 'manual';
+      },
+    ) => ShimmerController | null;
+    __veMotionShimmerPromise?: Promise<void>;
+  }
+}
+
+const veMotionShimmerCssUrl = 'https://cdn-tos-cn.bytedance.net/obj/archi/vedesign/motion/shimmer-border.css';
+const veMotionShimmerJsUrl = 'https://cdn-tos-cn.bytedance.net/obj/archi/vedesign/motion/shimmer-border.js';
 
 const paletteSteps = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950] as const;
 const primaryLightnessTemplate = [0.979, 0.953, 0.9, 0.826, 0.738, 0.65, 0.58, 0.484, 0.377, 0.269, 0.174];
@@ -219,6 +281,54 @@ function formatOklch(color: OklchColor) {
   return `oklch(${color.L.toFixed(3)} ${color.C.toFixed(4)} ${color.H.toFixed(1)})`;
 }
 
+function ensureVeMotionShimmer() {
+  if (typeof window === 'undefined') return Promise.resolve();
+  if (window.initShimmerBorder) return Promise.resolve();
+  if (window.__veMotionShimmerPromise) return window.__veMotionShimmerPromise;
+
+  window.__veMotionShimmerPromise = new Promise<void>((resolve, reject) => {
+    if (!document.querySelector('link[data-ve-motion-shimmer]')) {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = veMotionShimmerCssUrl;
+      link.setAttribute('data-ve-motion-shimmer', '');
+      document.head.appendChild(link);
+    }
+
+    const existingScript = document.querySelector<HTMLScriptElement>('script[data-ve-motion-shimmer]');
+    if (existingScript) {
+      existingScript.addEventListener('load', () => resolve(), { once: true });
+      existingScript.addEventListener('error', () => reject(new Error('ve-motion shimmer failed to load')), { once: true });
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = veMotionShimmerJsUrl;
+    script.async = true;
+    script.setAttribute('data-ve-motion-shimmer', '');
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error('ve-motion shimmer failed to load'));
+    document.head.appendChild(script);
+  });
+
+  return window.__veMotionShimmerPromise;
+}
+
+function getCssToken(name: string, fallback: string) {
+  if (typeof window === 'undefined') return fallback;
+  const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  return value || fallback;
+}
+
+function getComposerShimmerGradient(): ShimmerStop[] {
+  return [
+    { offset: '0%', color: getCssToken('--color-yellow-300', '#d7d94f') },
+    { offset: '34%', color: getCssToken('--color-moss-400', '#a9c85a') },
+    { offset: '68%', color: getCssToken('--color-green-400', '#6dbb68') },
+    { offset: '100%', color: getCssToken('--color-yellow-300', '#d7d94f') },
+  ];
+}
+
 function themeConfigToOklch(config: ThemeConfig): OklchColor {
   return { L: config.lightness, C: config.chroma, H: config.hue };
 }
@@ -273,13 +383,6 @@ const navItems: Array<{ page: NavPage; label: string; icon: IconComponent }> = [
   { page: 'settings', label: '设置', icon: IconSettings },
 ];
 
-const historyItems = [
-  '整理市场活动复盘',
-  '生成周会结论摘要',
-  '评审知识库权限配置',
-  '设计客服自动化流程',
-];
-
 const promptChips = [
   'AI 办公',
   '生成 PPT',
@@ -291,24 +394,16 @@ const promptChips = [
   '创建数据看板',
 ];
 
-const searchGroups = [
-  {
-    title: '今天',
-    items: [
-      { title: '帮我用类似 YouMind 的效果来生成一个图', meta: '会话 · 2 条消息', icon: IconMessage },
-      { title: '创建一个安全 Agent 产品说明页', meta: '项目 · 通用 Agent', icon: IconRobot },
-      { title: 'agent-workspace-brief.md', meta: '文件 · 42 KB', icon: IconDocument },
-    ],
-  },
-  {
-    title: '更早',
-    items: [
-      { title: '检查知识库权限风险', meta: 'Skill · 研究总结', icon: IconSkill },
-      { title: 'Browser MCP 流程验证', meta: 'MCP · 已停用', icon: IconPreview },
-      { title: '生成行业研究报告', meta: '模板 · 待安装', icon: IconGlobe },
-    ],
-  },
-];
+type SearchGroup = {
+  title: string;
+  items: Array<{
+    id: string;
+    title: string;
+    meta: string;
+    icon: IconComponent;
+    onOpen: () => void;
+  }>;
+};
 
 const galleryCards = [
   {
@@ -355,6 +450,57 @@ const initialMessages: AgentMessage[] = [
   },
 ];
 
+const initialConversations: Conversation[] = [
+  {
+    id: 'conversation-default',
+    title: '通用 Agent 工作台设计',
+    updatedAt: '2026-07-08 10:25',
+    messages: initialMessages,
+  },
+  {
+    id: 'conversation-review',
+    title: '整理市场活动复盘',
+    updatedAt: '2026-07-08 09:40',
+    messages: [
+      {
+        id: 'review-user',
+        role: 'user',
+        content: '帮我整理市场活动复盘，输出结论、风险和下一步。',
+        status: 'complete',
+        createdAt: '09:38',
+      },
+      {
+        id: 'review-assistant',
+        role: 'assistant',
+        content: '已整理为三部分：活动结果、关键风险和后续行动。你可以继续上传数据表，我会补充指标分析。',
+        status: 'complete',
+        createdAt: '09:40',
+      },
+    ],
+  },
+  {
+    id: 'conversation-meeting',
+    title: '生成周会结论摘要',
+    updatedAt: '2026-07-07 18:20',
+    messages: [
+      {
+        id: 'meeting-user',
+        role: 'user',
+        content: '把这周项目会内容整理成摘要。',
+        status: 'complete',
+        createdAt: '18:18',
+      },
+      {
+        id: 'meeting-assistant',
+        role: 'assistant',
+        content: '已生成摘要：本周重点是需求收敛、视觉还原和 API 接入，下周需要确认上线链路与验收标准。',
+        status: 'complete',
+        createdAt: '18:20',
+      },
+    ],
+  },
+];
+
 const initialCapabilities: CapabilityItem[] = [
   {
     id: 'research',
@@ -365,6 +511,7 @@ const initialCapabilities: CapabilityItem[] = [
     enabled: true,
     tags: ['研究', '引用'],
     icon: IconGlobe,
+    logo: researchLogo,
   },
   {
     id: 'doc-writer',
@@ -375,6 +522,7 @@ const initialCapabilities: CapabilityItem[] = [
     enabled: true,
     tags: ['写作', '模板'],
     icon: IconDocument,
+    logo: docWriterLogo,
   },
   {
     id: 'browser-mcp',
@@ -385,6 +533,7 @@ const initialCapabilities: CapabilityItem[] = [
     enabled: false,
     tags: ['浏览器', '验证'],
     icon: IconPreview,
+    logo: browserMcpLogo,
   },
   {
     id: 'file-mcp',
@@ -395,6 +544,7 @@ const initialCapabilities: CapabilityItem[] = [
     enabled: true,
     tags: ['文件', '代码'],
     icon: IconFolder,
+    logo: workspaceFilesLogo,
   },
   {
     id: 'data-agent',
@@ -405,6 +555,7 @@ const initialCapabilities: CapabilityItem[] = [
     enabled: false,
     tags: ['数据', '分析'],
     icon: IconDatabase,
+    logo: dataAgentLogo,
   },
   {
     id: 'review-agent',
@@ -415,6 +566,7 @@ const initialCapabilities: CapabilityItem[] = [
     enabled: false,
     tags: ['评审', '发布'],
     icon: IconCheck,
+    logo: reviewAgentLogo,
   },
   {
     id: 'animate',
@@ -425,6 +577,7 @@ const initialCapabilities: CapabilityItem[] = [
     enabled: false,
     tags: ['动效', '页面'],
     icon: IconPreview,
+    logo: animateLogo,
   },
   {
     id: 'design-audit',
@@ -435,6 +588,7 @@ const initialCapabilities: CapabilityItem[] = [
     enabled: true,
     tags: ['审查', '设计'],
     icon: IconCheck,
+    logo: designAuditLogo,
   },
   {
     id: 'playwright',
@@ -445,6 +599,7 @@ const initialCapabilities: CapabilityItem[] = [
     enabled: true,
     tags: ['测试', '浏览器'],
     icon: IconRefresh,
+    logo: playwrightRunnerLogo,
   },
   {
     id: 'presentation',
@@ -455,6 +610,7 @@ const initialCapabilities: CapabilityItem[] = [
     enabled: false,
     tags: ['PPT', '汇报'],
     icon: IconDocument,
+    logo: presentationLogo,
   },
 ];
 
@@ -567,12 +723,18 @@ const connectorRecommendations: ConnectorItem[] = [
 function AppSidebar({
   page,
   collapsed,
+  conversations,
+  activeConversationId,
   onPageChange,
+  onConversationOpen,
   onCollapsedChange,
 }: {
   page: Page;
   collapsed: boolean;
+  conversations: Conversation[];
+  activeConversationId: string | null;
   onPageChange: (page: NavPage) => void;
+  onConversationOpen: (id: string) => void;
   onCollapsedChange: (collapsed: boolean) => void;
 }) {
   return (
@@ -613,9 +775,14 @@ function AppSidebar({
         <SidebarItem prefix={<IconRobot size={20} />}>通用 Agent 控制台</SidebarItem>
       </SidebarGroup>
       <SidebarGroup label="历史会话">
-        {historyItems.map((item, index) => (
-          <SidebarItem key={item} type="history" unread={index === 0} onClick={() => onPageChange('chat')}>
-            {item}
+        {conversations.map((item, index) => (
+          <SidebarItem
+            key={item.id}
+            type="history"
+            unread={index === 0 && item.id !== activeConversationId}
+            onClick={() => onConversationOpen(item.id)}
+          >
+            {item.title}
           </SidebarItem>
         ))}
       </SidebarGroup>
@@ -652,26 +819,63 @@ function Composer({
   onCancel?: () => void;
   onAddFile?: () => void;
 }) {
+  const shellRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const host = shellRef.current;
+    if (!host) return;
+
+    const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    if (reduceMotion) return;
+
+    let alive = true;
+    let controller: ShimmerController | null = null;
+
+    ensureVeMotionShimmer()
+      .then(() => {
+        if (!alive || !host || !window.initShimmerBorder) return;
+        controller = window.initShimmerBorder(host, {
+          radius: 22,
+          strokeWidth: 1.5,
+          colorRatio: 0.42,
+          duration: loading ? 2.1 : 2.7,
+          loops: Infinity,
+          gradient: getComposerShimmerGradient(),
+          trigger: 'mount',
+        });
+      })
+      .catch(() => {
+        host.classList.add('shimmer-unavailable');
+      });
+
+    return () => {
+      alive = false;
+      controller?.destroy();
+    };
+  }, [loading]);
+
   return (
-    <ChatInput
-      className={compact ? 'agent-composer compact' : 'agent-composer'}
-      value={value}
-      loading={loading}
-      placeholder="有问题，尽管问"
-      leftAction={
-        <>
-          <ChatInputAction iconOnly icon={<IconAdd size={18} />} aria-label="添加文件" onClick={onAddFile} />
-          <ChatInputAction type="dropdown">Doubao Pro</ChatInputAction>
-          <ChatInputAction type="secondary">深度思考</ChatInputAction>
-        </>
-      }
-      rightAction={
-        <ChatInputAction iconOnly icon={<IconMicrophone size={18} />} aria-label="语音输入" />
-      }
-      onChange={(event) => onChange(event.detail.value)}
-      onSubmit={(event) => onSubmit(event.detail.value)}
-      onCancel={onCancel}
-    />
+    <div ref={shellRef} className={compact ? 'composer-shell ved-shimmer-host compact' : 'composer-shell ved-shimmer-host'}>
+      <ChatInput
+        className={compact ? 'agent-composer compact' : 'agent-composer'}
+        value={value}
+        loading={loading}
+        placeholder="有问题，尽管问"
+        leftAction={
+          <>
+            <ChatInputAction iconOnly icon={<IconAdd size={18} />} aria-label="添加文件" onClick={onAddFile} />
+            <ChatInputAction type="dropdown">Doubao Pro</ChatInputAction>
+            <ChatInputAction type="secondary">深度思考</ChatInputAction>
+          </>
+        }
+        rightAction={
+          <ChatInputAction iconOnly icon={<IconMicrophone size={18} />} aria-label="语音输入" />
+        }
+        onChange={(event) => onChange(event.detail.value)}
+        onSubmit={(event) => onSubmit(event.detail.value)}
+        onCancel={onCancel}
+      />
+    </div>
   );
 }
 
@@ -725,19 +929,19 @@ function WelcomePage({
 function SearchOverlay({
   visible,
   query,
+  groups = [],
   onQueryChange,
   onClose,
   onNewChat,
-  onOpenChat,
 }: {
   visible: boolean;
   query: string;
+  groups: SearchGroup[];
   onQueryChange: (value: string) => void;
   onClose: () => void;
   onNewChat: () => void;
-  onOpenChat: () => void;
 }) {
-  const groups = searchGroups
+  const visibleGroups = groups
     .map((group) => ({
       ...group,
       items: group.items.filter((item) => `${item.title} ${item.meta}`.toLowerCase().includes(query.toLowerCase())),
@@ -767,14 +971,14 @@ function SearchOverlay({
           新对话
         </button>
         <div className="search-result-list">
-          {groups.length ? (
-            groups.map((group) => (
+          {visibleGroups.length ? (
+            visibleGroups.map((group) => (
               <section key={group.title}>
                 <div className="search-section-title">{group.title}</div>
                 {group.items.map((item) => {
                   const Icon = item.icon;
                   return (
-                    <button key={item.title} className="search-result-row" type="button" onClick={onOpenChat}>
+                    <button key={item.id} className="search-result-row" type="button" onClick={item.onOpen}>
                       <span className="file-icon">
                         <Icon size={16} />
                       </span>
@@ -859,6 +1063,15 @@ function ConnectorCard({
   );
 }
 
+function CapabilityLogo({ item, size = 22 }: { item: CapabilityItem; size?: number }) {
+  const Icon = item.icon;
+  return item.logo ? (
+    <img className="capability-logo-img" src={item.logo} alt="" />
+  ) : (
+    <Icon size={size} />
+  );
+}
+
 function ChatPage({
   messages,
   status,
@@ -877,6 +1090,9 @@ function ChatPage({
   onArtifactViewChange,
   connectedConnectors,
   onConnectConnector,
+  feedback,
+  onFeedback,
+  onRetry,
 }: {
   messages: AgentMessage[];
   status: ChatStatus;
@@ -895,6 +1111,9 @@ function ChatPage({
   onArtifactViewChange: (view: ArtifactView) => void;
   connectedConnectors: string[];
   onConnectConnector: (id: string) => void;
+  feedback: 'like' | 'dislike' | null;
+  onFeedback: (value: 'like' | 'dislike') => void;
+  onRetry: () => void;
 }) {
   const latestAssistant = [...messages].reverse().find((message) => message.role === 'assistant');
 
@@ -921,7 +1140,7 @@ function ChatPage({
                 placement={message.role === 'user' ? 'end' : 'start'}
                 variant={message.role === 'user' ? 'filled' : 'text'}
                 shape={message.role === 'user' ? 'round' : 'corner'}
-                footer={<span className="message-time">{message.createdAt}</span>}
+                footer={message.role === 'user' ? <span className="message-time">{message.createdAt}</span> : undefined}
               >
                 {message.role === 'assistant' ? <Markdown content={message.content} /> : message.content}
               </Bubble>
@@ -955,11 +1174,57 @@ function ChatPage({
                     <span>Markdown · 18 KB · 已生成</span>
                   </ArtifactCard>
                   <Actions
+                    className="workspace-actions"
                     items={[
-                      { key: 'copy', icon: copied ? <IconCheck /> : <IconCopy />, text: copied ? '已复制' : '复制', onClick: onCopy },
-                      { key: 'retry', icon: <IconRefresh />, text: '重新生成' },
-                      { key: 'more', type: 'more', icon: <IconMoreHorizontal /> },
+                      {
+                        key: 'copy',
+                        icon: copied ? <IconCheck className="action-icon active" /> : <IconCopy className="action-icon" />,
+                        onClick: onCopy,
+                      },
+                      {
+                        key: 'retry',
+                        icon: <IconRefresh className="action-icon" />,
+                        onClick: onRetry,
+                      },
+                      { key: 'divider', divider: true },
+                      {
+                        key: 'like',
+                        icon:
+                          feedback === 'like' ? (
+                            <IconThumbUpFilled className="action-icon active" />
+                          ) : (
+                            <IconLike className="action-icon" />
+                          ),
+                        onClick: () => onFeedback('like'),
+                      },
+                      {
+                        key: 'dislike',
+                        icon:
+                          feedback === 'dislike' ? (
+                            <IconThumbDownFilled className="action-icon active" />
+                          ) : (
+                            <IconDislike className="action-icon" />
+                          ),
+                        onClick: () => onFeedback('dislike'),
+                      },
+                      {
+                        key: 'more',
+                        type: 'more',
+                        icon: <IconMoreHorizontal className="action-icon" />,
+                        menu: (
+                          <div className="workspace-action-menu">
+                            <button type="button">收藏回复</button>
+                            <button type="button">导出 Markdown</button>
+                            <button type="button">反馈问题</button>
+                          </div>
+                        ),
+                      },
                     ]}
+                    extra={
+                      <span className="workspace-actions-state">
+                        {copied ? '已复制' : feedback === 'like' ? '已赞同' : feedback === 'dislike' ? '已反馈' : ''}
+                      </span>
+                    }
                   />
                 </>
               ) : null}
@@ -1105,7 +1370,6 @@ function SkillPage({
         {visibleItems.length ? (
           <div className="capability-grid">
             {visibleItems.map((item) => {
-              const Icon = item.icon;
               return (
                 <article
                   key={item.id}
@@ -1118,7 +1382,7 @@ function SkillPage({
                   }}
                 >
                   <span className="capability-icon">
-                    <Icon size={22} />
+                    <CapabilityLogo item={item} />
                   </span>
                   <div>
                     <strong>{item.name}</strong>
@@ -1178,7 +1442,7 @@ function SkillPage({
           <div className="modal-detail-body">
             <div className="modal-hero">
               <span className="capability-icon large">
-                <selected.icon size={28} />
+                <CapabilityLogo item={selected} size={28} />
               </span>
               <div>
                 <h3>{selected.name}</h3>
@@ -1398,7 +1662,7 @@ function SettingsPage({
   settings: AgentSettings;
   saved: boolean;
   error: string;
-  apiStatus: typeof agentApiStatus;
+  apiStatus: AgentApiStatus;
   onPatch: (patch: Partial<AgentSettings>) => void;
   onSave: () => void;
   onReset: () => void;
@@ -1443,11 +1707,69 @@ function SettingsPage({
           <div className="setting-row">
             <span>
               <strong>Agent API</strong>
-              <small>{apiStatus.configured ? apiStatus.endpoint : '未配置 VITE_AGENT_API_URL，当前使用本地 mock 兜底'}</small>
+              <small>{apiStatus.configured ? apiStatus.endpoint : '未配置接口地址，当前使用本地 mock 兜底'}</small>
             </span>
             <Tag status={apiStatus.configured ? 'success' : 'warning'}>
               {apiStatus.configured ? '正式接口' : 'Mock 模式'}
             </Tag>
+          </div>
+          <label className="setting-row api-setting-row">
+            <span>
+              <strong>API Base URL</strong>
+              <small>服务根路径，用于后续补齐会话、文件库和能力管理接口</small>
+            </span>
+            <Input
+              className="api-setting-input"
+              placeholder="https://your-agent-service.example.com/api"
+              value={settings.apiBaseUrl}
+              onInput={(event) => onPatch({ apiBaseUrl: event.currentTarget.value })}
+            />
+          </label>
+          <label className="setting-row api-setting-row">
+            <span>
+              <strong>Chat API URL</strong>
+              <small>发送消息时调用的正式对话接口，支持 http(s) 或 /api 相对路径</small>
+            </span>
+            <Input
+              className="api-setting-input"
+              placeholder="https://your-agent-service.example.com/api/agent/chat"
+              status={error.includes('Chat API') ? 'error' : undefined}
+              value={settings.apiChatUrl}
+              onInput={(event) => onPatch({ apiChatUrl: event.currentTarget.value })}
+            />
+          </label>
+          <label className="setting-row api-setting-row">
+            <span>
+              <strong>Stream API URL</strong>
+              <small>预留给 SSE/流式输出，对齐 /api/agent/chat/stream</small>
+            </span>
+            <Input
+              className="api-setting-input"
+              placeholder="https://your-agent-service.example.com/api/agent/chat/stream"
+              status={error.includes('Stream API') ? 'error' : undefined}
+              value={settings.apiStreamUrl}
+              onInput={(event) => onPatch({ apiStreamUrl: event.currentTarget.value })}
+            />
+          </label>
+          <label className="setting-row api-setting-row">
+            <span>
+              <strong>API Key</strong>
+              <small>可选，调用时会作为 Bearer Token 写入 Authorization</small>
+            </span>
+            <Input
+              className="api-setting-input"
+              type="password"
+              placeholder="sk-..."
+              value={settings.apiKey}
+              onInput={(event) => onPatch({ apiKey: event.currentTarget.value })}
+            />
+          </label>
+          <div className="setting-row">
+            <span>
+              <strong>优先流式输出</strong>
+              <small>开启后优先使用 Stream API；当前未配置时仍走普通 Chat API</small>
+            </span>
+            <Switch checked={settings.preferStreaming} onChange={(event) => onPatch({ preferStreaming: event.detail.checked })} />
           </div>
           <label className="setting-row">
             <span>
@@ -1619,6 +1941,11 @@ function SettingsPage({
 const defaultSettings: AgentSettings = {
   model: 'Doubao Pro 1.5',
   temperature: '0.7',
+  apiBaseUrl: import.meta.env.VITE_AGENT_API_BASE_URL?.trim() || '',
+  apiChatUrl: agentApiStatus.endpoint,
+  apiStreamUrl: import.meta.env.VITE_AGENT_STREAM_URL?.trim() || '',
+  apiKey: import.meta.env.VITE_AGENT_API_KEY?.trim() || '',
+  preferStreaming: false,
   memory: true,
   approval: true,
   notifications: true,
@@ -1626,40 +1953,199 @@ const defaultSettings: AgentSettings = {
   themeConfig: defaultThemeConfig,
 };
 
+const storageKeys = {
+  conversations: 'agent.workspace.conversations',
+  capabilities: 'agent.workspace.capabilities',
+  mcpServers: 'agent.workspace.mcpServers',
+  files: 'agent.workspace.files',
+  settings: 'agent.workspace.settings',
+  connectors: 'agent.workspace.connectors',
+  activeConversationId: 'agent.workspace.activeConversationId',
+} as const;
+
+function readStorage<T>(key: string, fallback: T): T {
+  if (typeof window === 'undefined') return fallback;
+  try {
+    const value = window.localStorage.getItem(key);
+    return value ? (JSON.parse(value) as T) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function writeStorage<T>(key: string, value: T) {
+  if (typeof window === 'undefined') return;
+  window.localStorage.setItem(key, JSON.stringify(value));
+}
+
+function hydrateSettings(settings: Partial<AgentSettings>): AgentSettings {
+  return {
+    ...defaultSettings,
+    ...settings,
+    themeConfig: {
+      ...defaultThemeConfig,
+      ...(settings.themeConfig || {}),
+    },
+  };
+}
+
+function isApiUrl(value: string) {
+  const trimmed = value.trim();
+  return !trimmed || /^https?:\/\//i.test(trimmed) || trimmed.startsWith('/api/');
+}
+
+function createId(prefix: string) {
+  return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+function summarizeTitle(input: string) {
+  const text = input.trim().replace(/\s+/g, ' ');
+  return text.length > 18 ? `${text.slice(0, 18)}...` : text || '新对话';
+}
+
+function formatNow() {
+  return new Date().toLocaleString('zh-CN', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
+function fileKindFromFile(file: File): FileItem['kind'] {
+  if (file.type.startsWith('image/')) return 'image';
+  if (file.type.startsWith('video/')) return 'video';
+  if (/\.(ts|tsx|js|jsx|css|json|md|html)$/i.test(file.name)) return 'code';
+  return 'document';
+}
+
+function iconFromFileKind(kind: FileItem['kind']) {
+  if (kind === 'image') return IconTypeImageStateDefault;
+  if (kind === 'video') return IconTypeVideoStateDefault;
+  if (kind === 'code') return IconTypeCodeStateDefault;
+  return IconTypeWordStateDefault;
+}
+
+function formatBytes(size: number) {
+  if (size < 1024) return `${size} B`;
+  if (size < 1024 * 1024) return `${Math.round(size / 1024)} KB`;
+  return `${(size / 1024 / 1024).toFixed(1)} MB`;
+}
+
+function hydrateCapabilities(items: CapabilityItem[]) {
+  return items.map((item) => {
+    const source = initialCapabilities.find((candidate) => candidate.id === item.id);
+    return {
+      ...item,
+      icon: source?.icon || IconSkill,
+      logo: source?.logo || item.logo,
+    };
+  });
+}
+
+function hydrateMcpServers(items: McpServer[]) {
+  return items.map((item) => ({
+    ...item,
+    icon: initialMcpServers.find((candidate) => candidate.id === item.id)?.icon || IconDatabase,
+  }));
+}
+
+function hydrateFiles(items: FileItem[]) {
+  return items.map((item) => ({
+    ...item,
+    icon: iconFromFileKind(item.kind),
+  }));
+}
+
 export function App() {
-  const [page, setPage] = useState<Page>('welcome');
+  const [page, setPage] = useState<Page>(() =>
+    readStorage<string | null>(storageKeys.activeConversationId, null) ? 'chat' : 'welcome',
+  );
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [composer, setComposer] = useState('');
-  const [messages, setMessages] = useState<AgentMessage[]>(initialMessages);
+  const [conversations, setConversations] = useState<Conversation[]>(() =>
+    readStorage(storageKeys.conversations, initialConversations),
+  );
+  const [activeConversationId, setActiveConversationId] = useState<string | null>(() =>
+    readStorage<string | null>(storageKeys.activeConversationId, null),
+  );
+  const [messages, setMessages] = useState<AgentMessage[]>(() =>
+    readStorage(storageKeys.conversations, initialConversations).find(
+      (item) => item.id === readStorage<string | null>(storageKeys.activeConversationId, null),
+    )?.messages || [],
+  );
   const [status, setStatus] = useState<ChatStatus>('complete');
   const [expandedThinking, setExpandedThinking] = useState(true);
   const [artifactOpen, setArtifactOpen] = useState(false);
   const [artifactView, setArtifactView] = useState<ArtifactView>('preview');
   const [copied, setCopied] = useState(false);
+  const [responseFeedback, setResponseFeedback] = useState<'like' | 'dislike' | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [capabilities, setCapabilities] = useState(initialCapabilities);
+  const [capabilities, setCapabilities] = useState<CapabilityItem[]>(() =>
+    hydrateCapabilities(readStorage(storageKeys.capabilities, initialCapabilities)),
+  );
   const [skillQuery, setSkillQuery] = useState('');
   const [skillTab, setSkillTab] = useState('all');
   const [selectedCapability, setSelectedCapability] = useState<CapabilityItem | null>(null);
-  const [mcpServers, setMcpServers] = useState(initialMcpServers);
+  const [mcpServers, setMcpServers] = useState<McpServer[]>(() =>
+    hydrateMcpServers(readStorage(storageKeys.mcpServers, initialMcpServers)),
+  );
   const [mcpQuery, setMcpQuery] = useState('');
   const [mcpTab, setMcpTab] = useState('all');
-  const [connectedConnectors, setConnectedConnectors] = useState<string[]>([]);
-  const [files, setFiles] = useState(initialFiles);
+  const [connectedConnectors, setConnectedConnectors] = useState<string[]>(() =>
+    readStorage(storageKeys.connectors, [] as string[]),
+  );
+  const [files, setFiles] = useState<FileItem[]>(() => hydrateFiles(readStorage(storageKeys.files, initialFiles)));
   const [fileQuery, setFileQuery] = useState('');
   const [fileView, setFileView] = useState<'list' | 'grid'>('list');
-  const [settings, setSettings] = useState(defaultSettings);
+  const [settings, setSettings] = useState<AgentSettings>(() =>
+    hydrateSettings(readStorage(storageKeys.settings, defaultSettings)),
+  );
   const [settingsSaved, setSettingsSaved] = useState(true);
   const [settingsError, setSettingsError] = useState('');
   const timerRef = useRef<number | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     document.documentElement.dataset.theme = 'agent';
     document.documentElement.classList.toggle('dark', settings.theme === 'dark');
     applyThemeConfig(settings.themeConfig);
   }, [settings.theme, settings.themeConfig]);
+
+  useEffect(() => {
+    writeStorage(storageKeys.conversations, conversations);
+  }, [conversations]);
+
+  useEffect(() => {
+    if (activeConversationId) {
+      writeStorage(storageKeys.activeConversationId, activeConversationId);
+    } else {
+      window.localStorage.removeItem(storageKeys.activeConversationId);
+    }
+  }, [activeConversationId]);
+
+  useEffect(() => {
+    writeStorage(storageKeys.capabilities, capabilities);
+  }, [capabilities]);
+
+  useEffect(() => {
+    writeStorage(storageKeys.mcpServers, mcpServers);
+  }, [mcpServers]);
+
+  useEffect(() => {
+    writeStorage(storageKeys.files, files);
+  }, [files]);
+
+  useEffect(() => {
+    writeStorage(storageKeys.settings, settings);
+  }, [settings]);
+
+  useEffect(() => {
+    writeStorage(storageKeys.connectors, connectedConnectors);
+  }, [connectedConnectors]);
 
   useEffect(() => {
     return () => {
@@ -1683,12 +2169,54 @@ export function App() {
       return;
     }
     setSearchOpen(false);
+    if (nextPage === 'welcome') {
+      setActiveConversationId(null);
+      setMessages([]);
+      setComposer('');
+      setStatus('idle');
+    }
     setPage(nextPage);
   };
 
-  const finishAssistantMessage = (assistantId: string, content: string) => {
-    setMessages((current) =>
-      current.map((message) =>
+  const openConversation = (id: string) => {
+    const conversation = conversations.find((item) => item.id === id);
+    if (!conversation) return;
+    setActiveConversationId(id);
+    setMessages(conversation.messages);
+    setCopied(false);
+    setResponseFeedback(null);
+    setStatus('complete');
+    setSearchOpen(false);
+    setPage('chat');
+  };
+
+  const upsertConversation = (conversationId: string, title: string, nextMessages: AgentMessage[]) => {
+    setConversations((current) => {
+      const nextConversation: Conversation = {
+        id: conversationId,
+        title,
+        updatedAt: formatNow(),
+        messages: nextMessages,
+      };
+      const exists = current.some((item) => item.id === conversationId);
+      const merged = exists
+        ? current.map((item) => (item.id === conversationId ? { ...item, ...nextConversation, title: item.title || title } : item))
+        : [nextConversation, ...current];
+      return merged.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+    });
+  };
+
+  const syncActiveConversation = (nextMessages: AgentMessage[], fallbackTitle?: string) => {
+    const id = activeConversationId || createId('conversation');
+    if (!activeConversationId) setActiveConversationId(id);
+    const existing = conversations.find((item) => item.id === id);
+    upsertConversation(id, existing?.title || fallbackTitle || summarizeTitle(nextMessages[0]?.content || ''), nextMessages);
+    return id;
+  };
+
+  const finishAssistantMessage = (assistantId: string, content: string, conversationId = activeConversationId) => {
+    setMessages((current) => {
+      const nextMessages = current.map((message) =>
         message.id === assistantId
           ? {
               ...message,
@@ -1696,12 +2224,18 @@ export function App() {
               content,
             }
           : message,
-      ),
-    );
+      );
+      if (conversationId) {
+        upsertConversation(conversationId, summarizeTitle(nextMessages[0]?.content || ''), nextMessages);
+      } else {
+        syncActiveConversation(nextMessages);
+      }
+      return nextMessages;
+    });
     setStatus('complete');
   };
 
-  const runMockGeneration = (prompt: string, assistantId?: string) => {
+  const runMockGeneration = (prompt: string, assistantId?: string, conversationId?: string, usedApi = false) => {
     if (!prompt.trim()) return;
     if (timerRef.current) window.clearTimeout(timerRef.current);
     const targetAssistantId = assistantId || `assistant-${Date.now()}`;
@@ -1709,9 +2243,10 @@ export function App() {
     timerRef.current = window.setTimeout(() => {
       finishAssistantMessage(
         targetAssistantId,
-        agentApiStatus.configured
+        usedApi
           ? '正式 Agent API 暂时不可用，已使用本地兜底方案完成：建议检查接口地址、鉴权、CORS 和返回协议，然后重新发送。'
           : '已完成方案草稿：建议先确认目标用户和权限边界，再把 Agent 拆成任务启动、执行反馈、能力管理和系统设置四个稳定模块。右侧产物面板里可以继续维护详细说明。',
+        conversationId,
       );
       timerRef.current = null;
     }, 1400);
@@ -1721,8 +2256,10 @@ export function App() {
     if (!prompt.trim()) return;
     if (timerRef.current) window.clearTimeout(timerRef.current);
     abortRef.current?.abort();
+    const currentApiStatus = getAgentApiStatus({ endpoint: settings.apiChatUrl, apiKey: settings.apiKey });
 
     const now = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+    const conversationId = activeConversationId || createId('conversation');
     const userMessage: AgentMessage = {
       id: `user-${Date.now()}`,
       role: 'user',
@@ -1734,7 +2271,7 @@ export function App() {
     const assistantMessage: AgentMessage = {
       id: assistantId,
       role: 'assistant',
-      content: agentApiStatus.configured ? '正在调用正式 Agent API...' : '正在整理你的请求，准备生成可执行方案...',
+      content: currentApiStatus.configured ? '正在调用正式 Agent API...' : '正在整理你的请求，准备生成可执行方案...',
       status: 'generating',
       createdAt: now,
     };
@@ -1742,13 +2279,18 @@ export function App() {
     setPage('chat');
     setSearchOpen(false);
     setArtifactOpen(false);
+    setCopied(false);
+    setResponseFeedback(null);
     setStatus('generating');
     setExpandedThinking(true);
-    setMessages((current) => [...current, userMessage, assistantMessage]);
+    setActiveConversationId(conversationId);
+    const nextMessages = [...messages, userMessage, assistantMessage];
+    setMessages(nextMessages);
+    upsertConversation(conversationId, summarizeTitle(prompt), nextMessages);
     setComposer('');
 
-    if (!agentApiStatus.configured) {
-      runMockGeneration(prompt, assistantId);
+    if (!currentApiStatus.configured) {
+      runMockGeneration(prompt, assistantId, conversationId);
       return;
     }
 
@@ -1759,6 +2301,7 @@ export function App() {
       const response = await sendAgentMessage(
         {
           input: prompt.trim(),
+          conversationId,
           model: settings.model,
           temperature: Number(settings.temperature) || 0.7,
           messages: [...messages, userMessage].map((message) => ({
@@ -1766,10 +2309,21 @@ export function App() {
             role: message.role,
             content: message.content,
           })),
+          context: {
+            enabledSkills: capabilities.filter((item) => item.installed && item.enabled).map((item) => item.id),
+            enabledMcpServers: mcpServers.filter((item) => item.enabled && item.trusted).map((item) => item.id),
+            files: files
+              .filter((file) => file.status === 'ready')
+              .map((file) => ({ id: file.id, name: file.name, kind: file.kind, size: file.size })),
+          },
         },
         controller.signal,
+        {
+          endpoint: settings.apiChatUrl,
+          apiKey: settings.apiKey,
+        },
       );
-      finishAssistantMessage(assistantId, response.content || 'Agent API 已返回，但内容为空。');
+      finishAssistantMessage(assistantId, response.content || 'Agent API 已返回，但内容为空。', conversationId);
     } catch (error) {
       if (controller.signal.aborted) return;
       const detail = error instanceof Error ? error.message : String(error);
@@ -1783,10 +2337,15 @@ export function App() {
             : message,
         ),
       );
-      runMockGeneration(prompt, assistantId);
+      runMockGeneration(prompt, assistantId, conversationId, true);
     } finally {
       if (abortRef.current === controller) abortRef.current = null;
     }
+  };
+
+  const retryLastResponse = () => {
+    const lastUserMessage = [...messages].reverse().find((message) => message.role === 'user');
+    runAgentGeneration(lastUserMessage?.content || composer || '请重新生成上一条回复。');
   };
 
   const cancelGeneration = () => {
@@ -1795,32 +2354,40 @@ export function App() {
     abortRef.current = null;
     timerRef.current = null;
     setStatus('cancelled');
-    setMessages((current) =>
-      current.map((message) =>
+    setMessages((current) => {
+      const nextMessages = current.map((message) =>
         message.status === 'generating'
           ? { ...message, status: 'cancelled', content: '生成已停止。你可以继续补充要求后重新发送。' }
           : message,
-      ),
-    );
+      );
+      if (activeConversationId) upsertConversation(activeConversationId, summarizeTitle(nextMessages[0]?.content || ''), nextMessages);
+      return nextMessages;
+    });
   };
 
-  const addMockFile = () => {
-    setFiles((current) => [
-      {
-        id: `upload-${Date.now()}`,
-        name: `workspace-upload-${current.length + 1}.md`,
-        kind: 'document',
-        updatedAt: '刚刚',
-        size: '12 KB',
-        status: 'uploading',
-        icon: IconTypeWordStateDefault,
-      },
-      ...current,
-    ]);
+  const openFilePicker = () => {
     setPage('files');
-    window.setTimeout(() => {
-      setFiles((current) => current.map((file, index) => (index === 0 ? { ...file, status: 'ready' } : file)));
-    }, 900);
+    fileInputRef.current?.click();
+  };
+
+  const addSelectedFiles = (fileList: FileList | null) => {
+    if (!fileList?.length) return;
+    const nextFiles: FileItem[] = Array.from(fileList).map((file) => {
+      const kind = fileKindFromFile(file);
+      return {
+        id: createId('file'),
+        name: file.name,
+        kind,
+        updatedAt: formatNow(),
+        size: formatBytes(file.size),
+        status: 'ready',
+        icon: iconFromFileKind(kind),
+        mimeType: file.type || undefined,
+      };
+    });
+    setFiles((current) => [...nextFiles, ...current]);
+    setPage('files');
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const patchCapability = (id: string, patch: Partial<CapabilityItem>) => {
@@ -1836,7 +2403,7 @@ export function App() {
     setConnectedConnectors((current) => (current.includes(id) ? current : [...current, id]));
   };
 
-  const patchSettings = (patch: Partial<typeof defaultSettings>) => {
+  const patchSettings = (patch: Partial<AgentSettings>) => {
     setSettings((current) => ({ ...current, ...patch }));
     setSettingsSaved(false);
     setSettingsError('');
@@ -1849,9 +2416,83 @@ export function App() {
       setSettingsSaved(false);
       return;
     }
+    if (!isApiUrl(settings.apiBaseUrl)) {
+      setSettingsError('API Base URL 需要以 http(s) 或 /api 开头');
+      setSettingsSaved(false);
+      return;
+    }
+    if (!isApiUrl(settings.apiChatUrl)) {
+      setSettingsError('Chat API URL 需要以 http(s) 或 /api 开头');
+      setSettingsSaved(false);
+      return;
+    }
+    if (!isApiUrl(settings.apiStreamUrl)) {
+      setSettingsError('Stream API URL 需要以 http(s) 或 /api 开头');
+      setSettingsSaved(false);
+      return;
+    }
     setSettingsError('');
     setSettingsSaved(true);
   };
+
+  const dynamicSearchGroups = useMemo<SearchGroup[]>(
+    () => [
+      {
+        title: '会话',
+        items: conversations.map((conversation) => ({
+          id: conversation.id,
+          title: conversation.title,
+          meta: `会话 · ${conversation.messages.length} 条消息 · ${conversation.updatedAt}`,
+          icon: IconMessage,
+          onOpen: () => openConversation(conversation.id),
+        })),
+      },
+      {
+        title: '文件',
+        items: files.map((file) => ({
+          id: file.id,
+          title: file.name,
+          meta: `${file.kind} · ${file.size} · ${file.status === 'ready' ? '已就绪' : file.status}`,
+          icon: file.icon,
+          onOpen: () => {
+            setFileQuery(file.name);
+            setPage('files');
+            setSearchOpen(false);
+          },
+        })),
+      },
+      {
+        title: 'Skill 与模板',
+        items: capabilities.map((item) => ({
+          id: item.id,
+          title: item.name,
+          meta: `${item.type} · ${item.installed ? '已安装' : '待安装'} · ${item.enabled ? '已启用' : '未启用'}`,
+          icon: item.icon,
+          onOpen: () => {
+            setSkillQuery(item.name);
+            setSelectedCapability(item);
+            setPage('skills');
+            setSearchOpen(false);
+          },
+        })),
+      },
+      {
+        title: 'MCP',
+        items: mcpServers.map((item) => ({
+          id: item.id,
+          title: item.name,
+          meta: `${item.category} · ${item.enabled ? '已启用' : '未启用'} · ${item.trusted ? '可信' : '待授权'}`,
+          icon: item.icon,
+          onOpen: () => {
+            setMcpQuery(item.name);
+            setPage('mcp');
+            setSearchOpen(false);
+          },
+        })),
+      },
+    ],
+    [capabilities, conversations, files, mcpServers],
+  );
 
   const content = useMemo(() => {
     if (page === 'welcome') {
@@ -1860,7 +2501,7 @@ export function App() {
           composer={composer}
           onComposerChange={setComposer}
           onSubmit={runAgentGeneration}
-          onAddFile={addMockFile}
+          onAddFile={openFilePicker}
         />
       );
     }
@@ -1884,6 +2525,9 @@ export function App() {
           onArtifactViewChange={setArtifactView}
           connectedConnectors={connectedConnectors}
           onConnectConnector={connectConnector}
+          feedback={responseFeedback}
+          onFeedback={setResponseFeedback}
+          onRetry={retryLastResponse}
         />
       );
     }
@@ -1929,7 +2573,7 @@ export function App() {
           query={fileQuery}
           view={fileView}
           onQueryChange={setFileQuery}
-          onUpload={addMockFile}
+          onUpload={openFilePicker}
           onViewChange={setFileView}
         />
       );
@@ -1939,11 +2583,11 @@ export function App() {
         settings={settings}
         saved={settingsSaved}
         error={settingsError}
-        apiStatus={agentApiStatus}
+        apiStatus={getAgentApiStatus({ endpoint: settings.apiChatUrl, apiKey: settings.apiKey })}
         onPatch={patchSettings}
         onSave={saveSettings}
         onReset={() => {
-          setSettings(defaultSettings);
+          setSettings(hydrateSettings(defaultSettings));
           setSettingsSaved(true);
           setSettingsError('');
         }}
@@ -1957,6 +2601,7 @@ export function App() {
     artifactOpen,
     artifactView,
     copied,
+    responseFeedback,
     expandedThinking,
     connectedConnectors,
     capabilities,
@@ -1979,22 +2624,31 @@ export function App() {
       <AppSidebar
         page={page}
         collapsed={sidebarCollapsed}
+        conversations={conversations}
+        activeConversationId={activeConversationId}
         onPageChange={handleNavChange}
+        onConversationOpen={openConversation}
         onCollapsedChange={setSidebarCollapsed}
       />
       <main className="app-main">{content}</main>
+      <input
+        ref={fileInputRef}
+        className="file-input-hidden"
+        type="file"
+        multiple
+        onChange={(event) => addSelectedFiles(event.currentTarget.files)}
+      />
       <SearchOverlay
         visible={searchOpen}
         query={searchQuery}
+        groups={dynamicSearchGroups}
         onQueryChange={setSearchQuery}
         onClose={() => setSearchOpen(false)}
         onNewChat={() => {
+          setActiveConversationId(null);
+          setMessages([]);
           setComposer('');
           setPage('welcome');
-          setSearchOpen(false);
-        }}
-        onOpenChat={() => {
-          setPage('chat');
           setSearchOpen(false);
         }}
       />

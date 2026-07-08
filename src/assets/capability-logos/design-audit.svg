@@ -1,0 +1,12 @@
+<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="48" height="48" rx="14" fill="url(#audit-bg)"/>
+  <rect x="12" y="12" width="24" height="24" rx="6" fill="white" fill-opacity=".94"/>
+  <path d="M18 29l4 4 8-10" stroke="#4A35B8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M18 18h12M18 23h7" stroke="#4A35B8" stroke-width="2" stroke-linecap="round" opacity=".55"/>
+  <defs>
+    <linearGradient id="audit-bg" x1="7" y1="4" x2="43" y2="44" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#A8BCFF"/>
+      <stop offset="1" stop-color="#4D38D0"/>
+    </linearGradient>
+  </defs>
+</svg>
