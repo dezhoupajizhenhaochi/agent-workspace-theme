@@ -1,0 +1,1 @@
+import{d as o,r as e}from"./index-DNxC2sJI.js";const t='<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="m21 21-4.35-4.35M8 11h6m5 0a8 8 0 1 1-16 0 8 8 0 0 1 16 0"/></svg>',n={name:"zoom-out",svg:t};o();e(n);export{n as zoomOutIcon};

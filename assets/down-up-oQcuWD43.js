@@ -1,0 +1,1 @@
+import{d as o,r as e}from"./index-DNxC2sJI.js";const n='<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="m5 16 3 3 3-3m-3 3V5m11 3-3-3-3 3m3-3v14"/></svg>',r={name:"down-up",svg:n};o();e(r);export{r as downUpIcon};

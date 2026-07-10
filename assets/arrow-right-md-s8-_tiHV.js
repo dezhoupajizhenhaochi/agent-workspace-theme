@@ -1,0 +1,1 @@
+import{d as r,r as o}from"./index-DNxC2sJI.js";const e='<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 12h14m-6 6 6-6-6-6"/></svg>',t={name:"arrow-right-md",svg:e};r();o(t);export{t as arrowRightMdIcon};

@@ -1,0 +1,1 @@
+import{d as e,r as n}from"./index-DNxC2sJI.js";const o='<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 18h9.143M4 12h16M4 6h9.143"/></svg>',t={name:"menu-align-left",svg:o};e();n(t);export{t as menuAlignLeftIcon};

@@ -1,0 +1,1 @@
+import{d as e,r as n}from"./index-DNxC2sJI.js";const o='<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 5h16M12 12h8M4 19h16"/></svg>',t={name:"align-right",svg:o};e();n(t);export{t as alignRightIcon};
